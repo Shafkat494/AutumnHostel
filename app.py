@@ -81,6 +81,14 @@ class AllergyReport(db.Model):
     allergy_text = db.Column(db.String(200))
     date = db.Column(db.Date, nullable=False, default=date.today)
 
+class Feedback(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id', ondelete='SET NULL'))
+    message = db.Column(db.Text, nullable=False)
+    rating = db.Column(db.Integer)
+    created_at = db.Column(db.Date, default=date.today)
+
+
 # ------------------ Initialize DB & Default Users ------------------
 
 with app.app_context():
@@ -129,43 +137,7 @@ def home():
 
 # ------------------ Authentication ------------------
 
-# @app.route('/login', methods=['GET', 'POST'])
-# def login():
-#     # Check login type from URL query parameter or form submission
-#     login_type = request.args.get('login_type', 'admin_manager')
 
-#     if request.method == 'POST':
-#         username = request.form['username']
-#         password = request.form['password']
-#         login_type = request.form.get('login_type', login_type)
-
-#         if login_type == 'admin_manager':
-#             # Admin / Manager login
-#             user = User.query.filter_by(username=username).first()
-#             if user and user.role in ['admin', 'manager'] and user.check_password(password):
-#                 session['user_id'] = user.id
-#                 session['username'] = user.username
-#                 session['role'] = user.role
-#                 return redirect(url_for(f"{user.role}_dashboard"))
-#             else:
-#                 flash('Invalid admin/manager credentials!', 'danger')
-
-#         elif login_type == 'student':
-#             # Student login
-#             student = Student.query.filter_by(username=username).first()
-#             if student and student.check_password(password):
-#                 session['user_id'] = student.id
-#                 session['username'] = student.username
-#                 session['role'] = 'student'
-#                 return redirect(url_for('student_dashboard'))
-#             else:
-#                 flash('Invalid student credentials!', 'danger')
-
-#     # Render the correct login page depending on login_type
-#     if login_type == 'student':
-#         return render_template('student_login.html', login_type=login_type)
-#     else:
-#         return render_template('manager_login.html', login_type=login_type)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -390,6 +362,40 @@ def food_count():
         todays_menu=todays_menu,
         weekday=weekday
     )
+
+
+# ------------------ Feedback ------------------
+
+@app.route('/student_feedback', methods=['GET', 'POST'])
+@role_required('student')
+def student_feedback():
+    student = Student.query.filter_by(username=session['username']).first()
+    if not student:
+        flash("Student record not found.", "danger")
+        return redirect(url_for('logout'))
+
+    if request.method == 'POST':
+        message = request.form.get('message', '').strip()
+        rating = request.form.get('rating', None)
+
+        if not message:
+            flash("Please enter your feedback before submitting.", "warning")
+            return redirect(url_for('student_feedback'))
+
+        new_feedback = Feedback(student_id=student.id, message=message, rating=rating)
+        db.session.add(new_feedback)
+        db.session.commit()
+
+        flash("Thank you for your feedback! ✅", "success")
+        return redirect(url_for('student_dashboard'))
+
+    return render_template('student_feedback.html')
+
+@app.route('/admin_feedbacks')
+@role_required('admin', 'manager')
+def admin_feedbacks():
+    all_feedbacks = Feedback.query.order_by(Feedback.created_at.desc()).all()
+    return render_template('admin_feedbacks.html', feedbacks=all_feedbacks)
 
 # ------------------ Run App ------------------
 
