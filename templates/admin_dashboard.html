@@ -149,12 +149,23 @@
       </div>
 
       <div class="col-lg-3 col-md-4 col-sm-6">
-        <a href="{{ url_for('food_count') }}" class="card-action card-bg-warning text-center">
-          <i class="fas fa-chart-pie fa-2x"></i>
-          <div class="card-title">Food Count</div>
-          <div class="card-sub">View analytics & consumption</div>
+        <a href="{{ url_for('attendance_report') }}" class="card-action card-bg-warning text-center">
+          <i class="fas fa-clipboard-check fa-2x"></i>
+          <div class="card-title">Attendance Report</div>
+          <div class="card-sub">View daily attendance summary</div>
         </a>
       </div>
+
+
+      <!-- View Feedback -->
+      <div class="col-lg-3 col-md-4 col-sm-6">
+        <a href="{{ url_for('admin_feedbacks') }}" class="card-action card-bg-info text-center" style="background: linear-gradient(135deg,#6a11cb,#2575fc);">
+          <i class="fas fa-comments fa-2x"></i>
+          <div class="card-title">View Feedback</div>
+          <div class="card-sub">Analyze student feedback</div>
+        </a>
+      </div>
+
 
       <div class="col-lg-3 col-md-4 col-sm-6">
         <a href="{{ url_for('logout') }}" class="card-action card-bg-danger text-center">

@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import date
+from datetime import datetime, date
 import os
 from functools import wraps
+from sqlalchemy import extract, func
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev_secret_key_change_this')
@@ -176,10 +177,6 @@ def login():
             else:
                 flash('Invalid Student credentials!', 'danger')
 
-    # GET request: render appropriate login form
-    # NOTE: We render the login page even if a session exists,
-    # because you may want to allow logout and re-login as another role.
-    # If you want to force previously logged-in users to the dashboard, you can add a redirect here.
     return render_template('login.html', login_type=login_type)
 
 
@@ -329,40 +326,133 @@ def student_menu():
     todays_menu = Menu.query.filter_by(day=weekday).all()
     return render_template('student_menu.html', menu_items=todays_menu, weekday=weekday)
 
-# ------------------ Food Count ------------------
+# ------------------ Attendance report ------------------
 
-@app.route('/food_count')
+# @app.route('/attendance_report', methods=['GET', 'POST'])
+# @role_required('admin', 'manager')
+# def attendance_report():
+#     # Step 1: Read selected date from the form or query
+#     date_str = request.values.get('selected_date')
+    
+#     if date_str:
+#         try:
+#             selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+#         except ValueError:
+#             selected_date = date.today()
+#     else:
+#         selected_date = date.today()
+
+    # # Step 2: Get present students for that selected date
+    # present_students = (
+    #     db.session.query(Student)
+    #     .join(Attendance)
+    #     .filter(Attendance.date == selected_date)
+    #     .all()
+    # )
+
+    # # Step 3: Count total and present students
+    # total_students = Student.query.count()
+    # present_count = len(present_students)
+
+    # # Step 4: Render the page
+    # return render_template(
+    #     'attendance_report.html',
+    #     today=selected_date,  # use the selected date
+    #     present_students=present_students,
+    #     total_students=total_students,
+    #     present_count=present_count,
+    #     selected_date=selected_date  # for form display
+    # )
+
+@app.route('/attendance_report', methods=['GET', 'POST'])
 @role_required('admin', 'manager')
-def food_count():
-    today = date.today()
-    weekday = today.strftime('%A')
+def attendance_report():
+    # Step 1: Read selected date from the form or query
+    date_str = request.values.get('selected_date')
+    
+    if date_str:
+        try:
+            selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            selected_date = date.today()
+    else:
+        selected_date = date.today()
 
-    present_students = db.session.query(Student).join(Attendance).filter(Attendance.date == today).all()
-    todays_menu = Menu.query.filter_by(day=weekday).all()
-
-    veg_count = 0
-    nonveg_count = 0
-    allergy_issues = []
-
-    for student in present_students:
-        if student.food_type and student.food_type.lower() == 'veg':
-            veg_count += 1
-        else:
-            nonveg_count += 1
-
-        for item in todays_menu:
-            if student.allergies and student.allergies.lower() in item.item.lower():
-                allergy_issues.append({'student': student.name, 'item': item.item})
-
-    return render_template(
-        'food_count.html',
-        veg_count=veg_count,
-        nonveg_count=nonveg_count,
-        allergy_issues=allergy_issues,
-        todays_menu=todays_menu,
-        weekday=weekday
+    # Step 2: Get present students for that selected date
+    present_students = (
+        db.session.query(Student)
+        .join(Attendance)
+        .filter(Attendance.date == selected_date)
+        .all()
     )
 
+    # Step 3: Count total and present students
+    total_students = Student.query.count()
+    present_count = len(present_students)
+
+    # ----------------- APPENDED: Monthly attendance logic -----------------
+    # (uses SQL functions locally so we don't need to change top-level imports)
+    from sqlalchemy import extract, func
+    import calendar
+
+    month = selected_date.month
+    year = selected_date.year
+
+    # Actual number of days in the selected month
+    total_days_in_month = calendar.monthrange(year, month)[1]
+
+    # Query: count attendance rows per student in the selected month
+    monthly_query = (
+        db.session.query(
+            Student.id.label('student_id'),
+            Student.name.label('name'),
+            func.count(Attendance.id).label('days_present')
+        )
+        .join(Attendance, Attendance.student_id == Student.id)
+        .filter(
+            extract('year', Attendance.date) == year,
+            extract('month', Attendance.date) == month
+        )
+        .group_by(Student.id)
+        .all()
+    )
+
+    # Prepare dictionary mapping student_id -> info (ensure all students included)
+    monthly_attendance = {}
+    # initialize 0 for all students
+    for s in Student.query.all():
+        monthly_attendance[s.id] = {
+            'name': s.name,
+            'days_present': 0,
+            'total_days_in_month': total_days_in_month,
+            'absent_days': total_days_in_month,   # will adjust below
+            'attendance_pct': 0.0
+        }
+
+    # fill counts from query results
+    for row in monthly_query:
+        sid = row.student_id
+        days = int(row.days_present or 0)
+        monthly_attendance[sid]['days_present'] = days
+        monthly_attendance[sid]['absent_days'] = max(0, total_days_in_month - days)
+        if total_days_in_month > 0:
+            monthly_attendance[sid]['attendance_pct'] = round((days / total_days_in_month) * 100, 1)
+        else:
+            monthly_attendance[sid]['attendance_pct'] = 0.0
+
+    # ----------------------------------------------------------------------
+
+    # Step 4: Render the page (keeps original variable 'today' referencing selected_date)
+    return render_template(
+        'attendance_report.html',
+        today=selected_date,               # use the selected date (keeps existing template usage)
+        present_students=present_students,
+        total_students=total_students,
+        present_count=present_count,
+        selected_date=selected_date,       # for form display (keeps earlier behavior)
+        monthly_attendance=monthly_attendance,
+        total_days_in_month=total_days_in_month
+    )
 
 # ------------------ Feedback ------------------
 
