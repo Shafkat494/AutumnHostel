@@ -520,7 +520,7 @@ def student_feedback():
         flash("Thank you for your feedback! ✅", "success")
         return redirect(url_for('student_dashboard'))
 
-    return render_template('student_feedback.html')
+    return render_template('student_feedback.html', student=student)
 
 @app.route('/admin_feedbacks')
 @role_required('admin', 'manager')
