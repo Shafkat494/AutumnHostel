@@ -11,22 +11,41 @@ app.secret_key = os.environ.get('SECRET_KEY', 'dev_secret_key_change_this')
 
 # ------------------ Database Configuration ------------------
 
-DEFAULT_SQLITE = 'sqlite:///local.db'
+# ------------------ Database Configuration ------------------S
+
+# Get the absolute path to the current directory
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+# Define the instance folder path
+instance_path = os.path.join(basedir, 'instance')
+
+# Ensure the folder exists (creates it if missing)
+os.makedirs(instance_path, exist_ok=True)
+
+# Default SQLite database path
+DEFAULT_SQLITE = f"sqlite:///{os.path.join(instance_path, 'local.db')}"
+
+# Use DATABASE_URL if provided (for deployment), otherwise default to SQLite
 database_url = os.environ.get('DATABASE_URL', DEFAULT_SQLITE)
 
 # Fix for MySQL URI format on Render
 if database_url.startswith("mysql://"):
     database_url = database_url.replace("mysql://", "mysql+pymysql://", 1)
 
+# SQLAlchemy configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Optional: avoids timeout issues on Render
+# Optional: avoids timeout issues on some hosting platforms
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     "pool_pre_ping": True
 }
 
+# Initialize SQLAlchemy
 db = SQLAlchemy(app)
+# ------------------------------------------------------------
+
+
 # ------------------------------------------------------------
 
 
@@ -70,10 +89,22 @@ class Menu(db.Model):
     item = db.Column(db.String(100), nullable=False)
     food_type = db.Column(db.String(20))
 
+# class Attendance(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     student_id = db.Column(db.Integer, db.ForeignKey('student.id', ondelete='CASCADE'), nullable=False)
+#     date = db.Column(db.Date, nullable=False)
+
 class Attendance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey('student.id', ondelete='CASCADE'), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
     date = db.Column(db.Date, nullable=False)
+    breakfast = db.Column(db.Boolean, default=False)
+    lunch = db.Column(db.Boolean, default=False)
+    dinner = db.Column(db.Boolean, default=False)
+    supper = db.Column(db.Boolean, default=False)
+
+
+
 
 class AllergyReport(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -121,6 +152,18 @@ def role_required(*roles):
             return f(*args, **kwargs)
         return wrapped
     return decorator
+
+# ------------------ Login Required Decorator ------------------
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please log in first.', 'warning')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 
 # ------------------ Routes ------------------
 
@@ -277,45 +320,70 @@ def delete_menu(item_id):
 def attendance():
     all_students = Student.query.all()
     today = date.today()
+    meal_type = request.args.get('meal', 'dinner')  # default meal = dinner
 
     if request.method == 'POST':
         present_ids = request.form.getlist('present')
+
         for student in all_students:
             if str(student.id) in present_ids:
-                existing = Attendance.query.filter_by(student_id=student.id, date=today).first()
+                existing = Attendance.query.filter_by(student_id=student.id, date=today, meal=meal_type).first()
                 if not existing:
-                    new_att = Attendance(student_id=student.id, date=today)
+                    new_att = Attendance(student_id=student.id, date=today, meal=meal_type)
                     db.session.add(new_att)
-                    student.days_present += 1
+
+                    # Dinner auto-marks breakfast
+                    if meal_type == 'dinner':
+                        breakfast_check = Attendance.query.filter_by(student_id=student.id, date=today, meal='breakfast').first()
+                        if not breakfast_check:
+                            db.session.add(Attendance(student_id=student.id, date=today, meal='breakfast'))
+
         db.session.commit()
-        return redirect(url_for('attendance'))
+        flash(f"{meal_type.capitalize()} attendance marked successfully ✅", "success")
+        return redirect(url_for('attendance', meal=meal_type))
 
-    return render_template('attendance.html', students=all_students, today=today)
+    return render_template('attendance.html', students=all_students, today=today, meal_type=meal_type)
 
-@app.route('/student_attendance', methods=['GET', 'POST'])
-@role_required('student')
+@app.route('/student/attendance', methods=['GET', 'POST'])
+@login_required
 def student_attendance():
-    student = Student.query.filter_by(username=session['username']).first()
-    if not student:
-        flash("Student record not found.", "danger")
-        return redirect(url_for('logout'))
+    student = Student.query.get(session['user_id'])
+    today = date.today()
 
-    today = date.today()  # current date
+    # Decide current meal type from query (GET) or default to dinner
+    meal_type = request.args.get('meal', 'dinner')
 
     if request.method == 'POST':
-        existing = Attendance.query.filter_by(student_id=student.id, date=today).first()
-        if not existing:
-            new_att = Attendance(student_id=student.id, date=today)
-            db.session.add(new_att)
-            student.days_present += 1
-            db.session.commit()
-            flash("Attendance marked successfully! ✅", "success")
-        else:
-            flash("Attendance already marked for today!", "warning")
-        return redirect(url_for('student_attendance'))
+        # Get selected meal from form
+        meal = request.form.get('meal', meal_type)
 
-    # Pass 'today' to the template so Jinja2 can render it
-    return render_template('student_attendance.html', student=student, today=today)
+        # Find or create today's Attendance record for this student
+        attendance = Attendance.query.filter_by(student_id=student.id, date=today).first()
+        if not attendance:
+            attendance = Attendance(student_id=student.id, date=today)
+            db.session.add(attendance)
+
+        # Mark the selected meal as attended
+        setattr(attendance, meal, True)
+
+        # Extra logic:
+        # If dinner marked → also mark breakfast
+        if meal == 'dinner':
+            attendance.breakfast = True
+
+        # If supper marked → also mark dinner (and breakfast via dinner)
+        if meal == 'supper':
+            attendance.dinner = True
+            attendance.breakfast = True
+
+        db.session.commit()
+        flash(f"{meal.capitalize()} attendance marked successfully!", "success")
+
+        return redirect(url_for('student_attendance', meal=meal))
+
+    # Render the attendance page with the current meal_type
+    return render_template('student_attendance.html', student=student, today=today, meal_type=meal_type)
+
 
 # ------------------ Student Menu ------------------
 
@@ -327,42 +395,6 @@ def student_menu():
     return render_template('student_menu.html', menu_items=todays_menu, weekday=weekday)
 
 # ------------------ Attendance report ------------------
-
-# @app.route('/attendance_report', methods=['GET', 'POST'])
-# @role_required('admin', 'manager')
-# def attendance_report():
-#     # Step 1: Read selected date from the form or query
-#     date_str = request.values.get('selected_date')
-    
-#     if date_str:
-#         try:
-#             selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-#         except ValueError:
-#             selected_date = date.today()
-#     else:
-#         selected_date = date.today()
-
-    # # Step 2: Get present students for that selected date
-    # present_students = (
-    #     db.session.query(Student)
-    #     .join(Attendance)
-    #     .filter(Attendance.date == selected_date)
-    #     .all()
-    # )
-
-    # # Step 3: Count total and present students
-    # total_students = Student.query.count()
-    # present_count = len(present_students)
-
-    # # Step 4: Render the page
-    # return render_template(
-    #     'attendance_report.html',
-    #     today=selected_date,  # use the selected date
-    #     present_students=present_students,
-    #     total_students=total_students,
-    #     present_count=present_count,
-    #     selected_date=selected_date  # for form display
-    # )
 
 @app.route('/attendance_report', methods=['GET', 'POST'])
 @role_required('admin', 'manager')
@@ -378,11 +410,19 @@ def attendance_report():
     else:
         selected_date = date.today()
 
+    meal_type = request.args.get('meal', 'dinner')
+
+    # Read selected meal from query string or default to dinner
+    meal_type = request.args.get('meal', 'dinner')
+
     # Step 2: Get present students for that selected date
     present_students = (
         db.session.query(Student)
         .join(Attendance)
-        .filter(Attendance.date == selected_date)
+        .filter(
+            Attendance.date == selected_date,
+            getattr(Attendance, meal_type) == True
+        )
         .all()
     )
 
@@ -451,7 +491,8 @@ def attendance_report():
         present_count=present_count,
         selected_date=selected_date,       # for form display (keeps earlier behavior)
         monthly_attendance=monthly_attendance,
-        total_days_in_month=total_days_in_month
+        total_days_in_month=total_days_in_month,
+        meal_type=meal_type
     )
 
 # ------------------ Feedback ------------------

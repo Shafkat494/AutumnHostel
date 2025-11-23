@@ -7,7 +7,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
   <style>
-    /* 🌈 Background Animation */
+
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
@@ -40,7 +40,6 @@
       50% { transform: translateY(-40px) translateX(40px); }
     }
 
-    /* Navbar */
     .navbar {
       backdrop-filter: blur(10px);
       background: rgba(0, 0, 0, 0.6) !important;
@@ -52,7 +51,6 @@
       letter-spacing: 0.5px;
     }
 
-    /* Dashboard Cards */
     .card {
       border: none;
       border-radius: 20px;
@@ -80,7 +78,6 @@
       font-size: 15px;
     }
 
-    /* Buttons */
     .btn-primary {
       background: linear-gradient(135deg, #43e97b, #38f9d7);
       border: none;
@@ -95,7 +92,6 @@
       opacity: 0.9;
     }
 
-    /* Container Animation */
     .fade-in {
       animation: fadeIn 0.8s ease-in-out;
     }
@@ -105,7 +101,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
       .card { margin: 0 1rem; }
     }
@@ -114,23 +109,6 @@
 
 <body>
 
-  <!-- Animated Background -->
-  <div class="bg-animation">
-    {% for i in range(10) %}
-      <div class="circle"
-        style="
-          width: {{ 40 + (loop.index % 10) * 15 }}px;
-          height: {{ 40 + (loop.index % 10) * 15 }}px;
-          top: {{ (loop.index * 8) % 100 }}%;
-          left: {{ (loop.index * 10) % 100 }}%;
-          animation-duration: {{ 12 + (loop.index % 10) * 2 }}s;
-          animation-delay: {{ (loop.index * 0.5) % 5 }}s;
-        ">
-      </div>
-    {% endfor %}
-  </div>
-
-  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">📋 Manager Dashboard</a>
@@ -141,7 +119,6 @@
     </div>
   </nav>
 
-  <!-- Main Content -->
   <div class="container fade-in" style="padding-top: 100px; padding-bottom: 60px;">
     <div class="row g-4 justify-content-center">
       
@@ -157,32 +134,15 @@
       <div class="col-md-5">
         <div class="card text-center p-4">
           <i class="fas fa-clipboard-check fa-2x mb-3"></i>
-<<<<<<< HEAD
           <h5>Attendance Report</h5>
           <p>View today's attendance summary.</p>
           <a href="{{ url_for('attendance_report') }}" class="btn btn-primary mt-2">View</a>
         </div>
       </div>
 
-=======
-          <h5>Attendance</h5>
-          <p>Mark attendance for students present today.</p>
-          <a href="{{ url_for('attendance') }}" class="btn btn-primary mt-2">Go</a>
-        </div>
-      </div>
-
-      <div class="col-md-5">
-        <div class="card text-center p-4">
-          <i class="fas fa-chart-pie fa-2x mb-3"></i>
-          <h5>Food Count</h5>
-          <p>Check veg/non-veg count and allergy issues.</p>
-          <a href="{{ url_for('food_count') }}" class="btn btn-primary mt-2">Go</a>
-        </div>
-      </div>
-
->>>>>>> b992518377d8484fddb70dc4dc760390c1a1978c
     </div>
   </div>
 
 </body>
 </html>
+

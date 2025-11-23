@@ -66,16 +66,30 @@
       </form>
     </div>
 
-    <p class="text-muted mb-3">
-      Showing attendance for: <strong>{{ selected_date.strftime('%B %d, %Y') }}</strong>
-    </p>
-
     <!-- Summary Card -->
     <div class="card p-3 mb-4">
+      <h5>Attendance for: <strong>{{ meal_type.capitalize() }} — {{ selected_date.strftime('%B %d, %Y') }}</strong></h5>
       <h5>Total Students: {{ total_students }}</h5>
       <h5>Present: {{ present_count }}</h5>
       <h5>Absent: {{ total_students - present_count }}</h5>
     </div>
+
+    <!-- Meal Selector -->
+    <div class="mb-3 text-center">
+      <form method="GET" class="d-inline-flex">
+        <input type="hidden" name="selected_date" value="{{ selected_date.strftime('%Y-%m-%d') }}">
+        <select name="meal" class="form-select" onchange="this.form.submit()" style="width: auto;">
+          <option value="breakfast" {% if meal_type == 'breakfast' %}selected{% endif %}>Breakfast</option>
+          <option value="lunch" {% if meal_type == 'lunch' %}selected{% endif %}>Lunch</option>
+          <option value="dinner" {% if meal_type == 'dinner' %}selected{% endif %}>Dinner</option>
+          <option value="supper" {% if meal_type == 'supper' %}selected{% endif %}>Supper</option>
+        </select>
+      </form>
+    </div>
+
+    <p class="text-muted mb-3 text-center">
+      Showing <strong>{{ meal_type.capitalize() }}</strong> attendance for: <strong>{{ selected_date.strftime('%B %d, %Y') }}</strong>
+    </p>
 
     <!-- Present Students Table -->
     <div class="card p-3 mb-4">

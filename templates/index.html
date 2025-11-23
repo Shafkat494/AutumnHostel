@@ -160,25 +160,7 @@
 </head>
 
 <body>
-  <!-- Floating Background Circles -->
-  <div class="circle-container">
-    {% for i in range(20) %}
-      <div class="circle"
-        style="
-          width: {{ 50 + (loop.index % 10) * 20 }}px;
-          height: {{ 50 + (loop.index % 10) * 20 }}px;
-          top: {{ (loop.index * 5) % 100 }}%;
-          left: {{ (loop.index * 7) % 100 }}%;
-          animation-duration: {{ 15 + (loop.index % 10) * 3 }}s;
-          animation-delay: {{ (loop.index * 0.5) % 5 }}s;
-          --moveX: {{ (-50 + (loop.index % 100)) * 5 }}px;
-          --moveY: {{ (50 - (loop.index % 100)) * 4 }}px;
-        ">
-      </div>
-    {% endfor %}
-  </div>
 
-  <!-- Main Content -->
   <div class="container page-container">
     <h1>🏨 Hostel Food Management System</h1>
 
