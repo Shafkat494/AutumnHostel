@@ -426,6 +426,67 @@ def student_attendance():
         today=today
     )
 
+@app.route('/attendance_summary/<selected_date>')
+@role_required('admin', 'manager')
+def attendance_summary(selected_date):
+    # Convert string to date object
+    try:
+        selected_date_obj = datetime.strptime(selected_date, '%Y-%m-%d').date()
+    except ValueError:
+        flash("Invalid date format.", "danger")
+        return redirect(url_for('attendance_report'))
+
+    import calendar
+    from sqlalchemy import extract, func
+
+    # Month/year for summary
+    month = selected_date_obj.month
+    year = selected_date_obj.year
+
+    total_days_in_month = calendar.monthrange(year, month)[1]
+
+    # Query monthly attendance
+    monthly_query = (
+        db.session.query(
+            Student.id.label('student_id'),
+            Student.name.label('name'),
+            func.count(Attendance.id).label('days_present')
+        )
+        .join(Attendance, Attendance.student_id == Student.id)
+        .filter(
+            extract('year', Attendance.date) == year,
+            extract('month', Attendance.date) == month
+        )
+        .group_by(Student.id)
+        .all()
+    )
+
+    # Prepare dictionary for all students
+    monthly_attendance = {}
+    for s in Student.query.all():
+        monthly_attendance[s.id] = {
+            'name': s.name,
+            'days_present': 0,
+            'total_days_in_month': total_days_in_month,
+            'absent_days': total_days_in_month,
+            'attendance_pct': 0.0
+        }
+
+    for row in monthly_query:
+        sid = row.student_id
+        days = int(row.days_present or 0)
+        monthly_attendance[sid]['days_present'] = days
+        monthly_attendance[sid]['absent_days'] = max(0, total_days_in_month - days)
+        if total_days_in_month > 0:
+            monthly_attendance[sid]['attendance_pct'] = round((days / total_days_in_month) * 100, 1)
+
+    return render_template(
+        'attendance_summary.html',
+        selected_date=selected_date_obj,
+        monthly_attendance=monthly_attendance,
+        total_days_in_month=total_days_in_month
+    )
+
 # ------------------ Student Menu ------------------
 
 @app.route('/student_menu')

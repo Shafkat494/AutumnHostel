@@ -1,185 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Attendance Report</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      background: #f7f8fa;
-      font-family: "Poppins", sans-serif;
-      color: #333;
-      padding-bottom: 60px;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Attendance Report | Hostel Food Management</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    .container {
-      margin-top: 80px;
-    }
+<style>
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(135deg, #b33900 0%, #ff7b00 50%, #e63946 100%);
+    background-repeat: no-repeat;
+    background-attachment: fixed;   
+    background-size: cover;
+}
 
-    h2 {
-      font-weight: 700;
-      color: #2c3e50;
-      text-align: center;
-      margin-bottom: 30px;
-    }
+.container {
+    flex: 1;
+    padding: 20px;
+}
 
-    .card {
-      border: none;
-      border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-      background: #fff;
-    }
+.navbar {
+    background: rgba(0,0,0,0.25);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 6px 25px rgba(0,0,0,0.35);
+}
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: #fff !important;
+}
+.navbar-text {
+    color: #ffe6d0;
+    font-weight: 500;
+}
 
-    .table th {
-      background-color: #2c3e50;
-      color: #fff;
-      text-align: center;
-    }
+.page-title {
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 35px;
+    text-align: center;
+}
 
-    .badge-danger {
-      background-color: #e74c3c;
-    }
+.card {
+    border: none;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(14px);
+    color: white;
+    box-shadow: 0 15px 45px rgba(0,0,0,0.4);
+    transition: all 0.3s ease;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+.card:hover { transform: translateY(-3px); }
 
-    footer {
-      text-align: center;
-      padding: 15px 0;
-      background: #2c3e50;
-      color: #fff;
-      position: fixed;
-      width: 100%;
-      bottom: 0;
-    }
-  </style>
+.form-control,
+.form-select {
+    background: rgba(255,255,255,0.95);
+    border: none;
+    border-radius: 12px;
+    color: #333;
+    padding: 10px;
+}
+.form-control:focus,
+.form-select:focus {
+    box-shadow: 0 0 0 2px rgba(255,159,28,0.4);
+    outline: none;
+}
+.form-label { font-weight: 500; color: #ffe6d0; }
+
+.btn-success {
+    background: linear-gradient(135deg,#ff9f1c,#ff5400);
+    border: none;
+    font-weight: 600;
+    padding: 11px 16px;
+    border-radius: 12px;
+    transition: all 0.2s;
+}
+.btn-success:hover { transform: translateY(-2px); }
+
+.btn-secondary {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    border-radius: 10px;
+}
+.btn-secondary:hover { background: rgba(255,255,255,0.35); }
+
+.table {
+    color: white;
+    border-radius: 12px;
+    overflow: hidden;
+}
+.table thead {
+    background: rgba(255,255,255,0.2);
+}
+.table tbody tr:hover {
+    background: rgba(255,255,255,0.1);
+}
+.table th, .table td {
+    vertical-align: middle;
+}
+
+footer {
+    text-align: center;
+    padding: 15px 0;
+    background: rgba(0,0,0,0.3);
+    color: white;
+    flex-shrink: 0;
+}
+footer strong { color: white; }
+
+@media(max-width:576px){
+    .page-title { font-size: 1.6rem; }
+    .navbar-text { display: none; }
+}
+</style>
 </head>
 <body>
-  <div class="container">
-    
-    <!-- Title and Date Picker -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2>Attendance Report</h2>
-      
-      <form method="GET" class="d-flex">
-        <input type="date" name="selected_date" class="form-control me-2"
-               value="{{ selected_date.strftime('%Y-%m-%d') }}">
-        <button class="btn btn-primary">View</button>
-      </form>
-    </div>
 
-    <!-- Summary Card -->
-    <div class="card p-3 mb-4">
-      <h5>Attendance for: <strong>{{ meal_type.capitalize() }} — {{ selected_date.strftime('%B %d, %Y') }}</strong></h5>
-      <h5>Total Students: {{ total_students }}</h5>
-      <h5>Present: {{ present_count }}</h5>
-      <h5>Absent: {{ total_students - present_count }}</h5>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark shadow-sm px-4">
+    <a class="navbar-brand">🏫 Hostel Food Management</a>
+    <div class="ms-auto d-flex align-items-center">
+        <span class="navbar-text me-3">👤 {{ session['username'] }}</span>
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">Logout</a>
     </div>
+</nav>
 
-    <!-- Meal Selector -->
-    <div class="mb-3 text-center">
-      <form method="GET" class="d-inline-flex">
+<div class="container mt-4">
+
+<h1 class="page-title">📊 Attendance Report</h1>
+
+<!-- Date Selector -->
+<div class="card mb-4">
+    <form method="GET" class="d-flex flex-wrap align-items-center gap-2">
+        <label class="form-label mb-0">Select Date:</label>
+        <input type="date" name="selected_date" class="form-control" value="{{ selected_date.strftime('%Y-%m-%d') }}">
+        <button class="btn btn-success">View</button>
+    </form>
+</div>
+
+<!-- Attendance Summary -->
+<div class="card mb-4">
+    <h5>Attendance for: <strong>{{ meal_type.capitalize() }} — {{ selected_date.strftime('%B %d, %Y') }}</strong></h5>
+    <p>Total Students: {{ total_students }} | Present: {{ present_count }} | Absent: {{ total_students - present_count }}</p>
+</div>
+
+<!-- Meal Selector -->
+<div class="card mb-4 text-center">
+    <form method="GET" class="d-inline-flex gap-2 align-items-center">
         <input type="hidden" name="selected_date" value="{{ selected_date.strftime('%Y-%m-%d') }}">
-        <select name="meal" class="form-select" onchange="this.form.submit()" style="width: auto;">
-          <option value="breakfast" {% if meal_type == 'breakfast' %}selected{% endif %}>Breakfast</option>
-          <option value="lunch" {% if meal_type == 'lunch' %}selected{% endif %}>Lunch</option>
-          <option value="dinner" {% if meal_type == 'dinner' %}selected{% endif %}>Dinner</option>
-          <option value="supper" {% if meal_type == 'supper' %}selected{% endif %}>Supper</option>
+        <label class="form-label mb-0">Meal:</label>
+        <select name="meal" class="form-select" onchange="this.form.submit()" style="width:auto;">
+          {% for m in ['breakfast','lunch','dinner','supper'] %}
+          <option value="{{ m }}" {% if meal_type == m %}selected{% endif %}>{{ m.capitalize() }}</option>
+          {% endfor %}
         </select>
-      </form>
-    </div>
+    </form>
+</div>
 
-    <p class="text-muted mb-3 text-center">
-      Showing <strong>{{ meal_type.capitalize() }}</strong> attendance for: <strong>{{ selected_date.strftime('%B %d, %Y') }}</strong>
-    </p>
-
-    <!-- Present Students Table -->
-    <div class="card p-3 mb-4">
-      <h4>Present Students</h4>
-      {% if present_students %}
-      <table class="table table-bordered table-striped mt-3">
+<!-- Present Students Table -->
+<div class="card">
+    <h4>Present Students</h4>
+    {% if present_students %}
+    <table class="table table-hover table-bordered mt-3 text-white">
         <thead>
-          <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Room</th>
-            <th>Food Type</th>
-            <th>Allergies</th>
-          </tr>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Room</th>
+                <th>Allergies</th>
+            </tr>
         </thead>
         <tbody>
-          {% for s in present_students %}
-          <tr>
-            <td>{{ loop.index }}</td>
-            <td>{{ s.name }}</td>
-            <td>{{ s.room }}</td>
-            <td>{{ s.food_type|capitalize }}</td>
-            <td>{{ s.allergies if s.allergies else 'None' }}</td>
-          </tr>
-          {% endfor %}
+            {% for s in present_students %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ s.name }}</td>
+                <td>{{ s.room }}</td>
+                <td>{{ s.allergies if s.allergies else 'None' }}</td>
+            </tr>
+            {% endfor %}
         </tbody>
-      </table>
-      {% else %}
-        <p>No attendance records for this date.</p>
-      {% endif %}
-    </div>
+    </table>
+    {% else %}
+        <p class="text-center text-light mt-2">No attendance records for this date.</p>
+    {% endif %}
+</div>
 
-    <!-- Allergic Students -->
-    <div class="card p-3">
-      <h4 class="text-danger">Allergic Students</h4>
-      {% set allergic_students = present_students|selectattr('allergies')|list %}
-      {% if allergic_students %}
-      <ul class="list-group mt-3">
-        {% for s in allergic_students %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          {{ s.name }} (Room {{ s.room }})
-          <span class="badge bg-danger">{{ s.allergies }}</span>
-        </li>
-        {% endfor %}
-      </ul>
-      {% else %}
-        <p>No allergic students present 🎉</p>
-      {% endif %}
-    </div>
+<!-- Link to Full Attendance Summary -->
+<div class="card mt-4 text-center">
+    <a href="{{ url_for('attendance_summary', selected_date=selected_date.strftime('%Y-%m-%d')) }}" class="btn btn-success btn-lg">
+        📅 View Full Attendance Summary
+    </a>
+</div>
 
-     <!-- Monthly Attendance Summary -->
-    <div class="card p-3 mt-4">
-      <h4>📅 Monthly Attendance Summary ({{ selected_date.strftime('%B %Y') }})</h4>
-      <p class="text-muted mb-3">Total days in month: {{ total_days_in_month }}</p>
+<div class="text-center mt-4">
+    <a href="{{ url_for('manager_dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+</div>
 
-      <table class="table table-bordered table-striped mt-3 bg-white text-dark">
-        <thead class="table-dark">
-          <tr>
-            <th>#</th>
-            <th>Student Name</th>
-            <th>Days Present</th>
-            <th>Days Absent</th>
-            <th>Attendance %</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for sid, info in monthly_attendance.items() %}
-          <tr class="{% if info.attendance_pct < 75 %}low-attendance{% endif %}">
-            <td>{{ loop.index }}</td>
-            <td>{{ info.name }}</td>
-            <td>{{ info.days_present }}</td>
-            <td>{{ info.absent_days }}</td>
-            <td>{{ info.attendance_pct }}%</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+</div>
 
-    <div class="text-center mt-4">
-      <a href="{{ url_for('manager_dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
-    </div>
-  </div>
-
-</body>
-
-<!-- Footer -->
 <footer>
-  <p>&copy; 2025 Hostel Food Management System</p>
-  <p>Developed by <strong>Shafkat Zahoor</strong></p>
+    <p>&copy; 2025 Hostel Food Management System</p>
+    <p>Developed by <strong>Shafkat Zahoor</strong> & <strong>Bhat Irshad</strong></p>
 </footer>
 
+</body>
 </html>
