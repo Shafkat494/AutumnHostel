@@ -286,23 +286,44 @@ def delete_student(student_id):
         flash("Student not found.", "danger")
     return redirect(url_for('students'))
 
+@app.route('/clear_day', methods=['POST'])
+@role_required('admin', 'manager')
+def clear_day():
+    session.pop('selected_day', None)
+    flash("Day selection cleared. You can choose a new day.", "info")
+    return redirect(url_for('menu'))
+
 # ------------------ Menu Management ------------------
 
 @app.route('/menu', methods=['GET', 'POST'])
 @role_required('admin', 'manager')
 def menu():
     if request.method == 'POST':
-        day = request.form['day']
-        meal = request.form['meal']
-        item = request.form['item']
-        food_type = request.form['food_type']
+        # Get selected day
+        day = request.form.get('day')
+        if not day:
+            flash("Please select a day.", "warning")
+            return redirect(url_for('menu'))
 
-        new_item = Menu(day=day, meal=meal, item=item, food_type=food_type)
-        db.session.add(new_item)
+        # Store the selected day in session for convenience
+        session['selected_day'] = day
+
+        # Iterate over the four meals
+        for meal in ['breakfast', 'lunch', 'dinner', 'supper']:
+            items_text = request.form.get(f'meal_{meal}', '').strip()
+            if items_text:
+                # Split multiple items by comma
+                items_list = [i.strip() for i in items_text.split(',') if i.strip()]
+                for item in items_list:
+                    new_menu = Menu(day=day, meal=meal.capitalize(), item=item)
+                    db.session.add(new_menu)
+
         db.session.commit()
+        flash(f"Menu saved for {day}.", "success")
         return redirect(url_for('menu'))
 
-    all_items = Menu.query.all()
+    # GET request: show all menu items
+    all_items = Menu.query.order_by(Menu.day, Menu.meal).all()
     return render_template('menu.html', menus=all_items)
 
 @app.route('/menu/delete/<int:item_id>', methods=['POST'])
