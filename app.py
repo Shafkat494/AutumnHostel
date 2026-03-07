@@ -195,7 +195,7 @@ def login():
         password = request.form.get('password', '')
 
         # --- Admin / Manager login (shared page) ---
-        if login_type == 'admin_manager':
+        if login_type in ['admin', 'manager']:
             user = User.query.filter_by(username=username).first()
             if user and user.role in ['admin', 'manager'] and user.check_password(password):
                 session['user_id'] = user.id
@@ -344,46 +344,66 @@ def attendance():
 
     return render_template('attendance.html', students=all_students, today=today, meal_type=meal_type)
 
+# ------------------ Student Attendance ------------------
+
 @app.route('/student/attendance', methods=['GET', 'POST'])
 @login_required
 def student_attendance():
     student = Student.query.get(session['user_id'])
     today = date.today()
 
-    # Decide current meal type from query (GET) or default to dinner
-    meal_type = request.args.get('meal', 'dinner')
+    if not student:
+        flash("Student not found.", "danger")
+        return redirect(url_for('logout'))
 
     if request.method == 'POST':
-        # Get selected meal from form
-        meal = request.form.get('meal', meal_type)
+        # Get all selected meals (checkboxes)
+        meals = request.form.getlist('meal')
 
-        # Find or create today's Attendance record for this student
+        if not meals:
+            flash("Please select at least one meal.", "warning")
+            return redirect(url_for('student_attendance'))
+
+        # Find or create today's attendance record
         attendance = Attendance.query.filter_by(student_id=student.id, date=today).first()
+
         if not attendance:
             attendance = Attendance(student_id=student.id, date=today)
             db.session.add(attendance)
 
-        # Mark the selected meal as attended
-        setattr(attendance, meal, True)
+        # Mark selected meals
+        for meal in meals:
 
-        # Extra logic:
-        # If dinner marked → also mark breakfast
-        if meal == 'dinner':
-            attendance.breakfast = True
+            # Skip if already marked
+            if getattr(attendance, meal):
+                continue
 
-        # If supper marked → also mark dinner (and breakfast via dinner)
-        if meal == 'supper':
-            attendance.dinner = True
-            attendance.breakfast = True
+            setattr(attendance, meal, True)
+
+            # Existing logic preserved
+            if meal == 'dinner':
+                attendance.breakfast = True
+
+            if meal == 'supper':
+                attendance.dinner = True
+                attendance.breakfast = True
 
         db.session.commit()
-        flash(f"{meal.capitalize()} attendance marked successfully!", "success")
 
-        return redirect(url_for('student_attendance', meal=meal))
+        # Correct flash message
+        if len(meals) == 4:
+            flash("Attendance marked for today for all meals.", "success")
+        else:
+            meal_names = ", ".join([m.capitalize() for m in meals])
+            flash(f"Attendance marked for {meal_names}.", "success")
 
-    # Render the attendance page with the current meal_type
-    return render_template('student_attendance.html', student=student, today=today, meal_type=meal_type)
+        return redirect(url_for('student_attendance'))
 
+    return render_template(
+        'student_attendance.html',
+        student=student,
+        today=today
+    )
 
 # ------------------ Student Menu ------------------
 
@@ -501,6 +521,7 @@ def attendance_report():
 @role_required('student')
 def student_feedback():
     student = Student.query.filter_by(username=session['username']).first()
+
     if not student:
         flash("Student record not found.", "danger")
         return redirect(url_for('logout'))
@@ -513,20 +534,57 @@ def student_feedback():
             flash("Please enter your feedback before submitting.", "warning")
             return redirect(url_for('student_feedback'))
 
-        new_feedback = Feedback(student_id=student.id, message=message, rating=rating)
+        new_feedback = Feedback(
+            student_id=student.id,
+            message=message,
+            rating=rating
+        )
+
         db.session.add(new_feedback)
         db.session.commit()
 
         flash("Thank you for your feedback! ✅", "success")
-        return redirect(url_for('student_dashboard'))
 
-    return render_template('student_feedback.html', student=student)
+        # IMPORTANT: stay on feedback page
+        return redirect(url_for('student_feedback'))
+
+    # Get previous feedbacks of THIS student
+    feedbacks = Feedback.query.filter_by(student_id=student.id)\
+                              .order_by(Feedback.created_at.desc())\
+                              .limit(3)\
+                              .all()
+
+    return render_template(
+        'student_feedback.html',
+        student=student,
+        feedbacks=feedbacks
+    )
 
 @app.route('/admin_feedbacks')
 @role_required('admin', 'manager')
 def admin_feedbacks():
     all_feedbacks = Feedback.query.order_by(Feedback.created_at.desc()).all()
     return render_template('admin_feedbacks.html', feedbacks=all_feedbacks)
+
+# ------------------ Delete Feedback -------------------
+
+@app.route('/delete_feedback/<int:feedback_id>', methods=['POST'])
+@role_required('student')
+def delete_feedback(feedback_id):
+
+    student = Student.query.get(session['user_id'])
+    feedback = Feedback.query.get(feedback_id)
+
+    if not feedback or feedback.student_id != student.id:
+        flash("You cannot delete this feedback.", "danger")
+        return redirect(url_for('student_feedback'))
+
+    db.session.delete(feedback)
+    db.session.commit()
+
+    flash("Feedback deleted successfully.", "success")
+
+    return redirect(url_for('student_feedback'))
 
 # ------------------ Run App ------------------
 

@@ -1,210 +1,253 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hostel Food Management</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- External Libraries -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Hostel Dining Management</title>
 
-  <style>
-    /* =============== Base Layout =============== */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 
-    html, body {
-      height: 100%;
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      color: #fff;
-    }
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    body {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 100vh;
-      background: radial-gradient(circle at top right, #141E30, #243B55);
-      overflow-x: hidden;
-      position: relative;
-    }
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    /* =============== Background Animation =============== */
-    .circle-container {
-      position: fixed;
-      inset: 0;
-      overflow: hidden;
-      z-index: -1;
-    }
+<style>
 
-    .circle {
-      position: absolute;
-      border-radius: 50%;
-      opacity: 0.35;
-      background: radial-gradient(circle, rgba(255,255,255,0.9), rgba(255,255,255,0));
-      animation: moveCircle linear infinite;
-    }
+body{
+background: linear-gradient(135deg,#8B4513,#D2691E,#FF8C00);
+min-height:100vh;
+font-family:'Poppins',sans-serif;
+color:white;
+display:flex;
+flex-direction:column;
+}
 
-    @keyframes moveCircle {
-      0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.6; }
-      50% { opacity: 0.3; }
-      100% { transform: translate3d(var(--moveX), var(--moveY), 0) scale(1.2); opacity: 0.7; }
-    }
+/* Main content */
 
-    /* =============== Page Container =============== */
-    .page-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 4rem 1rem;
-      position: relative;
-      z-index: 1;
-    }
+.main-content{
+flex:1;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:40px 20px;
+text-align:center;
+}
 
-    h1 {
-      font-weight: 700;
-      font-size: 2.2rem;
-      margin-bottom: 2rem;
-      text-shadow: 0 4px 20px rgba(0,0,0,0.4);
-      animation: fadeInDown 1s ease forwards;
-      opacity: 0;
-    }
+/* Title */
 
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+.main-title{
+font-size:2.4rem;
+font-weight:700;
+margin-bottom:15px;
+}
 
-    /* =============== Login Cards =============== */
-    .card {
-      background: rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 20px;
-      color: #fff;
-      text-align: center;
-      padding: 2.2rem 1.2rem;
-      transition: all 0.35s ease;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-      position: relative;
-      overflow: hidden;
-    }
+/* Subtitle */
 
-    .card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(67, 233, 123, 0.4), rgba(56, 249, 215, 0.4));
-      opacity: 0;
-      transition: opacity 0.4s ease;
-      z-index: 0;
-    }
+.subtitle{
+max-width:600px;
+margin:auto;
+color:#ffe4c4;
+font-size:1.05rem;
+margin-bottom:35px;
+line-height:1.6;
+}
 
-    .card:hover::before { opacity: 1; }
-    .card:hover {
-      transform: translateY(-8px) scale(1.03);
-      box-shadow: 0 15px 35px rgba(0,0,0,0.35);
-    }
+/* Card */
 
-    .card i {
-      font-size: 2.6rem;
-      margin-bottom: 1rem;
-      z-index: 1;
-      position: relative;
-    }
+.login-card{
+background:rgba(255,255,255,0.1);
+backdrop-filter:blur(18px);
+border:1px solid rgba(255,255,255,0.25);
+border-radius:18px;
+padding:35px 30px;
+transition:all .4s ease;
+box-shadow:0 15px 45px rgba(0,0,0,0.35);
+color:white;
+}
 
-    .card h5 {
-      font-weight: 600;
-      font-size: 1.1rem;
-      z-index: 1;
-      position: relative;
-    }
+.login-card:hover{
+transform:translateY(-8px) scale(1.02);
+box-shadow:0 20px 60px rgba(0,0,0,0.45);
+}
 
-    /* =============== Buttons =============== */
-    .btn {
-      border-radius: 10px;
-      font-weight: 600;
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-    }
+.login-card i{
+font-size:2.8rem;
+margin-bottom:10px;
+}
 
-    .btn:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 26px rgba(0,0,0,0.3);
-    }
+/* Buttons */
 
-    /* =============== Footer =============== */
-    footer {
-      background: rgba(0,0,0,0.3);
-      backdrop-filter: blur(8px);
-      color: rgba(255,255,255,0.85);
-      text-align: center;
-      padding: 1rem 0;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      margin-top: auto;
-      z-index: 2;
-    }
+.btn-success{
+background:linear-gradient(135deg,#FF8C00,#FF4500);
+border:none;
+border-radius:10px;
+font-weight:600;
+padding:8px 20px;
+}
 
-    footer strong { color: #38f9d7; }
+.btn-success:hover{
+transform:translateY(-2px);
+opacity:0.95;
+}
 
-    /* =============== Responsive =============== */
-    @media (max-width: 768px) {
-      h1 { font-size: 1.7rem; }
-      .card { margin: 0 0.5rem; padding: 1.8rem 1rem; }
-    }
-  </style>
+.btn-dark{
+border-radius:10px;
+font-weight:600;
+}
 
+.btn-danger{
+border-radius:10px;
+font-weight:600;
+}
 
+/* Welcome text */
+
+.welcome-text{
+color:#ffe4c4;
+font-weight:500;
+margin-bottom:20px;
+}
+
+/* Footer */
+
+footer{
+text-align:center;
+padding:20px;
+background:rgba(0,0,0,0.35);
+backdrop-filter:blur(10px);
+border-top:1px solid rgba(255,255,255,0.2);
+color:#ffe4c4;
+font-size:0.9rem;
+margin-top:auto;
+}
+
+footer strong{
+color:#fff;
+}
+
+/* Responsive */
+
+@media(max-width:768px){
+
+.main-title{
+font-size:2rem;
+}
+
+.subtitle{
+font-size:0.95rem;
+}
+
+.login-card{
+padding:30px 20px;
+}
+
+}
+
+@media(max-width:480px){
+
+.main-title{
+font-size:1.7rem;
+}
+
+.subtitle{
+font-size:0.9rem;
+}
+
+}
+
+</style>
 </head>
 
 <body>
-  <div class="container page-container">
 
-    <h1>🏨 Hostel Food Management System</h1>
+<div class="main-content">
 
-    {% if 'user_id' in session %}
-      <h3 class="mb-4">Welcome, {{ session['username'] }} ({{ session['role']|capitalize }}) 👋</h3>
+<div class="container">
 
-      {% if session['role'] == 'admin' %}
-        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-dark m-2">Admin Dashboard</a>
-      {% elif session['role'] == 'manager' %}
-        <a href="{{ url_for('manager_dashboard') }}" class="btn btn-dark m-2">Manager Dashboard</a>
-      {% elif session['role'] == 'student' %}
-        <a href="{{ url_for('student_attendance') }}" class="btn btn-success m-2">Mark Attendance</a>
-        <a href="{{ url_for('student_menu') }}" class="btn btn-success m-2">View Menu</a>
-      {% endif %}
-      <a href="{{ url_for('logout') }}" class="btn btn-danger m-2">Logout</a>
+<div class="row justify-content-center">
 
-    {% else %}
-      <div class="row justify-content-center mt-4 g-4">
-        <div class="col-md-4">
-          <a href="{{ url_for('login', login_type='admin_manager') }}" class="text-decoration-none">
-            <div class="card">
-              <i class="fas fa-user-shield"></i>
-              <h5>Admin / Manager Login</h5>
-            </div>
-          </a>
-        </div>
-        <div class="col-md-4">
-          <a href="{{ url_for('login', login_type='student') }}" class="text-decoration-none">
-            <div class="card">
-              <i class="fas fa-user-graduate"></i>
-              <h5>Student Login</h5>
-            </div>
-          </a>
-        </div>
-      </div>
-    {% endif %}
-  </div>
+<div class="col-lg-6 col-md-8 col-sm-12">
 
-  <!-- Footer -->
-  <footer>
-    <p>&copy; 2025 Hostel Food Management System</p>
-    <p>Developed by <strong>Shafkat Zahoor</strong></p>
-  </footer>
+<h1 class="main-title">🏨 Hostel Dining Management</h1>
+
+<p class="subtitle">
+A smart platform for managing hostel meals, menus, and attendance —
+helping both staff and students stay organized and informed.
+</p>
+
+{% if 'user_id' in session %}
+
+<h5 class="welcome-text">
+Welcome, {{ session['username'] }} ({{ session['role']|capitalize }}) 👋
+</h5>
+
+{% if session['role'] == 'admin' %}
+
+<a href="{{ url_for('admin_dashboard') }}" class="btn btn-dark m-2">
+Admin Dashboard
+</a>
+
+{% elif session['role'] == 'manager' %}
+
+<a href="{{ url_for('manager_dashboard') }}" class="btn btn-dark m-2">
+Manager Dashboard
+</a>
+
+{% elif session['role'] == 'student' %}
+
+<a href="{{ url_for('student_attendance') }}" class="btn btn-success m-2">
+Mark Attendance
+</a>
+
+<a href="{{ url_for('student_menu') }}" class="btn btn-success m-2">
+View Menu
+</a>
+
+{% endif %}
+
+<br>
+
+<a href="{{ url_for('logout') }}" class="btn btn-danger m-2">
+Logout
+</a>
+
+{% else %}
+
+<a href="{{ url_for('login') }}" class="text-decoration-none">
+
+<div class="login-card">
+
+<i class="fas fa-right-to-bracket"></i>
+
+<h5>Access Your Portal</h5>
+
+</div>
+
+</a>
+
+{% endif %}
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<footer>
+
+<p>© 2025 Hostel Dining Management System</p>
+
+<p>
+Developed by
+<strong>Shafkat Zahoor</strong>
+&
+<strong>Bhat Irshad</strong>
+</p>
+
+</footer>
+
 </body>
 </html>

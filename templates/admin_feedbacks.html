@@ -1,97 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Student Feedbacks</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      background: linear-gradient(135deg, #1f1f1f, #3c3c3c);
-      color: #fff;
-      min-height: 100vh;
-      font-family: 'Poppins', sans-serif;
-    }
+<meta charset="UTF-8">
+<title>Student Feedbacks</title>
 
-    .navbar {
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(10px);
-    }
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    .container {
-      margin-top: 80px;
-      z-index: 2;
-      position: relative;
-    }
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    .feedback-card {
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 15px;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-      margin-bottom: 20px;
-      transition: transform 0.3s ease;
-      padding: 20px;
-    }
+<style>
 
-    .feedback-card:hover {
-      transform: translateY(-5px);
-    }
+body{
+background: linear-gradient(135deg,#b33900,#ff7b00,#e63946);
+min-height:100vh;
+font-family:'Poppins',sans-serif;
+color:white;
+display:flex;
+flex-direction:column;
+}
 
-    .feedback-header {
-      font-weight: 600;
-      color: #00c6ff;
-      margin-bottom: 10px;
-    }
+/* Navbar */
 
-    .feedback-message {
-      color: #e0e0e0;
-      margin-bottom: 8px;
-    }
+.navbar{
+background:rgba(0,0,0,0.25);
+backdrop-filter:blur(12px);
+border-bottom:1px solid rgba(255,255,255,0.2);
+box-shadow:0 6px 25px rgba(0,0,0,0.35);
+}
 
-    .feedback-date {
-      font-size: 0.9rem;
-      color: #aaa;
-    }
+.navbar-brand{
+font-weight:600;
+color:#fff !important;
+}
 
-    .no-feedback {
-      text-align: center;
-      color: #ccc;
-      font-size: 1.2rem;
-      margin-top: 50px;
-    }
-  </style>
+/* Container */
+
+.container{
+margin-top:60px;
+z-index:2;
+position:relative;
+flex:1;
+}
+
+/* Page Title */
+
+h2{
+font-weight:700;
+margin-bottom:35px;
+}
+
+/* Feedback Cards */
+
+.feedback-card{
+background:rgba(255,255,255,0.12);
+backdrop-filter:blur(14px);
+border-radius:18px;
+padding:20px;
+margin-bottom:20px;
+border:1px solid rgba(255,255,255,0.25);
+box-shadow:0 15px 45px rgba(0,0,0,0.4);
+transition:all 0.35s ease;
+animation:fadeInUp 0.6s ease;
+}
+
+.feedback-card:hover{
+transform:translateY(-6px) scale(1.01);
+box-shadow:0 20px 60px rgba(0,0,0,0.45);
+}
+
+/* Feedback Header */
+
+.feedback-header{
+font-weight:600;
+font-size:1.05rem;
+color:#ffe6d0;
+margin-bottom:10px;
+}
+
+/* Message */
+
+.feedback-message{
+color:#fff;
+margin-bottom:8px;
+line-height:1.5;
+word-wrap:break-word;
+overflow-wrap:break-word;
+}
+
+/* Date */
+
+.feedback-date{
+font-size:0.85rem;
+color:#ffd6b3;
+}
+
+/* No Feedback */
+
+.no-feedback{
+text-align:center;
+color:#ffe6d0;
+font-size:1.2rem;
+margin-top:50px;
+}
+
+/* Footer */
+
+footer{
+margin-top:40px;
+text-align:center;
+font-size:14px;
+color:#ffe6d0;
+width:100%;
+}
+
+/* Animation */
+
+@keyframes fadeInUp{
+from{opacity:0; transform:translateY(20px);}
+to{opacity:1; transform:translateY(0);}
+}
+
+/* Responsive */
+
+@media(max-width:576px){
+
+.container{
+padding:0 15px;
+}
+
+.feedback-card{
+padding:16px;
+}
+
+}
+
+</style>
 </head>
 
 <body>
-  <nav class="navbar navbar-dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="{{ url_for('admin_dashboard') }}">← Back to Dashboard</a>
-    </div>
-  </nav>
 
-  <div class="container">
-    <h2 class="text-center mb-4">All Student Feedbacks</h2>
+<nav class="navbar navbar-dark">
+<div class="container-fluid">
+<a class="navbar-brand" href="{{ url_for('admin_dashboard') }}">← Back to Dashboard</a>
+</div>
+</nav>
 
-    {% if feedbacks %}
-      {% for fb in feedbacks %}
-        <div class="feedback-card">
-          <div class="feedback-header">
-            From: {{ fb.student_name if fb.student_name else 'Anonymous' }}
-          </div>
-          <div class="feedback-message">{{ fb.message }}</div>
-          <div class="feedback-date">Submitted on: {{ fb.created_at.strftime("%d %b %Y, %I:%M %p") }}</div>
-        </div>
-      {% endfor %}
-    {% else %}
-      <div class="no-feedback">No feedback submitted yet.</div>
-    {% endif %}
-  </div>
-</body>
+<div class="container">
 
-<!-- Footer -->
+<h2 class="text-center">All Student Feedbacks</h2>
+
+{% if feedbacks %}
+
+{% for fb in feedbacks %}
+
+<div class="feedback-card">
+
+<div class="feedback-header">
+From: {{ fb.student_name if fb.student_name else 'Anonymous' }}
+</div>
+
+<div class="feedback-message">
+{{ fb.message }}
+</div>
+
+<div class="feedback-date">
+Submitted on: {{ fb.created_at.strftime("%d %b %Y, %I:%M %p") }}
+</div>
+
+</div>
+
+{% endfor %}
+
+{% else %}
+
+<div class="no-feedback">
+No feedback submitted yet.
+</div>
+
+{% endif %}
+
+</div>
+
 <footer>
-  <p>&copy; 2025 Hostel Food Management System</p>
-  <p>Developed by <strong>Shafkat Zahoor</strong></p>
+
+<p>&copy; 2025 Hostel Food Management System</p>
+<p>Developed by <strong>Shafkat Zahoor</strong> & <strong>Bhat Irshad</strong></p>
+
 </footer>
 
+</body>
 </html>

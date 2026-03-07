@@ -1,207 +1,209 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Mark Meal Attendance</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-  <style>
-    body {
-        background: linear-gradient(135deg, #8e2de2, #4a00e0);
-        min-height: 100vh;
-        font-family: 'Poppins', sans-serif;
-        padding: 2rem;
-        color: #fff;
-        overflow-x: hidden;
-    }
+<meta charset="utf-8">
+<title>Mark Meal Attendance</title>
 
-    .card {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(14px);
-        border-radius: 22px;
-        padding: 2rem 2.5rem;
-        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
-        color: #fff;
-        transition: all 0.4s ease;
-        animation: fadeInUp 1s ease-out;
-    }
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    .card:hover {
-        transform: translateY(-4px) scale(1.02);
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-    }
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    h3 {
-        font-weight: 700;
-        color: #fff;
-        text-align: center;
-        margin-bottom: 1.5rem;
-        font-size: 2rem;
-        text-shadow: 0 3px 10px rgba(0,0,0,0.4);
-        animation: fadeInText 1.2s ease-out;
-    }
+<style>
 
-    p {
-        color: #f0f0f0;
-        font-size: 16px;
-        text-align: center;
-        line-height: 1.6;
-        animation: fadeInText 1.4s ease-out;
-    }
+body{
+    background: linear-gradient(135deg,#b33900,#ff7b00,#e63946);
+    min-height:100vh;
+    font-family:'Poppins',sans-serif;
+    color:#fff;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
 
-    .btn {
-        border-radius: 14px;
-        font-weight: 600;
-        transition: all 0.4s ease;
-        letter-spacing: 0.5px;
-    }
+.card{
+    background:rgba(255,255,255,0.12);
+    backdrop-filter:blur(14px);
+    border-radius:20px;
+    padding:2rem;
+    max-width:500px;
+    width:100%;
+    box-shadow:0 15px 45px rgba(0,0,0,0.4);
+    animation:fadeInUp 0.8s ease;
+}
 
-    .btn-success {
-        background: linear-gradient(135deg, #ff7e5f, #feb47b);
-        border: none;
-        color: #fff;
-        font-weight: 700;
-        padding: 0.9rem 1rem;
-        width: 100%;
-        margin-bottom: 1rem;
-        box-shadow: 0 6px 15px rgba(255, 126, 95, 0.5);
-        position: relative;
-        overflow: hidden;
-    }
+h3{
+    font-weight:700;
+    text-align:center;
+    margin-bottom:20px;
+}
 
-    .btn-success:hover {
-        transform: translateY(-2px) scale(1.03);
-        box-shadow: 0 10px 25px rgba(255, 126, 95, 0.6);
-    }
+.meal-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-bottom:20px;
+}
 
-    .btn-outline-primary,
-    .btn-secondary,
-    .btn-danger {
-        width: 100%;
-        margin-top: 0.6rem;
-        font-weight: 500;
-        color: #fff;
-        border: 1px solid rgba(255, 255, 255, 0.4);
-        background: transparent;
-        position: relative;
-        overflow: hidden;
-    }
+.meal-option{
+    background:rgba(255,255,255,0.15);
+    padding:10px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    cursor:pointer;
+    transition:0.3s;
+}
 
-    .btn-outline-primary:hover {
-        background: rgba(255, 255, 255, 0.2);
-        border-color: #ffb347;
-        color: #fff;
-    }
+.meal-option:hover{
+    background:rgba(255,255,255,0.25);
+}
 
-    .alert {
-        background: rgba(255, 255, 255, 0.15);
-        border: none;
-        color: #fff;
-        border-radius: 12px;
-        font-weight: 500;
-        text-align: center;
-        padding: 0.8rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-        animation: fadeInAlert 1.2s ease-out;
-    }
+.meal-option input{
+    transform:scale(1.3);
+}
 
-    hr {
-        border-color: rgba(255, 255, 255, 0.2);
-        margin: 1.5rem 0;
-    }
+.select-all{
+    background:rgba(255,255,255,0.25);
+    padding:10px;
+    border-radius:12px;
+    margin-bottom:15px;
+    text-align:center;
+    cursor:pointer;
+}
 
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(30px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
+.btn-success{
+    background:linear-gradient(135deg,#ff9f1c,#ff5400);
+    border:none;
+    font-weight:600;
+    padding:12px;
+    border-radius:12px;
+}
 
-    @keyframes fadeInText {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
+.btn-success:hover{
+    transform:translateY(-2px);
+}
 
-    @keyframes fadeInAlert {
-        from { opacity: 0; transform: scale(0.95); }
-        to { opacity: 1; transform: scale(1); }
-    }
+.btn-outline-primary,
+.btn-secondary,
+.btn-danger{
+    width:100%;
+    margin-top:10px;
+    border-radius:10px;
+}
 
-    @media (max-width: 480px) {
-        body { padding: 1rem; }
-        h3 { font-size: 1.6rem; }
-        p { font-size: 14px; }
-        .btn { padding: 0.65rem 0.8rem; font-size: 0.95rem; }
-    }
+footer{
+    margin-top:20px;
+    text-align:center;
+    font-size:14px;
+    color:#ffe6d0;
+}
 
-    /* Dropdown styling */
-    .meal-select {
-        text-align: center;
-        margin-bottom: 1rem;
-    }
+@keyframes fadeInUp{
+from{opacity:0; transform:translateY(20px);}
+to{opacity:1; transform:translateY(0);}
+}
 
-    select {
-        background: rgba(255,255,255,0.2);
-        border: none;
-        color: #fff;
-        font-size: 1rem;
-        padding: 0.5rem 1rem;
-        border-radius: 10px;
-        cursor: pointer;
-        outline: none;
-    }
+@media(max-width:480px){
 
-    option {
-        color: #000;
-    }
-  </style>
+.card{
+padding:1.5rem;
+}
+
+.meal-grid{
+grid-template-columns:1fr;
+}
+
+}
+
+</style>
 </head>
 <body>
-  <div class="card">
-    <h3 class="mb-3">Mark {{ meal_type.capitalize() }} Attendance — {{ student.name }}</h3>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for cat, msg in messages %}
-          <div class="alert alert-{{ cat }}">{{ msg }}</div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+<div class="card">
 
-    <!-- Meal Selector -->
-    <div class="meal-select">
-      <form method="get" action="{{ url_for('student_attendance') }}">
-        <label for="meal">Select Meal:</label>
-        <select name="meal" id="meal" onchange="this.form.submit()">
-          <option value="breakfast" {% if meal_type == 'breakfast' %}selected{% endif %}>Breakfast</option>
-          <option value="lunch" {% if meal_type == 'lunch' %}selected{% endif %}>Lunch</option>
-          <option value="dinner" {% if meal_type == 'dinner' %}selected{% endif %}>Dinner</option>
-          <option value="supper" {% if meal_type == 'supper' %}selected{% endif %}>Supper</option>
-        </select>
+<h3>Mark Meal Attendance — {{ student.name }}</h3>
 
-      </form>
-    </div>
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for cat,msg in messages %}
+<div class="alert alert-{{ cat }}">{{ msg }}</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
 
-    <form method="POST">
-      <!-- hidden field so POST tells server which meal is being marked -->
-      <input type="hidden" name="meal" id="selected_meal" value="{{ meal_type }}">
+<form method="POST">
 
-      <p>Click the button below to mark your attendance for <strong>{{ today }}</strong> ({{ meal_type.capitalize() }}).</p>
-      <button type="submit" class="btn btn-success">Mark {{ meal_type.capitalize() }} Attendance</button>
-    </form>
+<p class="text-center">
+Select the meals you will attend today (<strong>{{ today }}</strong>)
+</p>
 
+<!-- Select All -->
+<label class="select-all">
+<input type="checkbox" id="select_all"> Mark Attendance For All Meals
+</label>
 
-    <hr>
+<div class="meal-grid">
 
-    <a href="{{ url_for('student_menu') }}" class="btn btn-outline-primary">View Today's Menu</a>
-    <a href="{{ url_for('home') }}" class="btn btn-secondary">Back to Home</a>
-    <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
-  </div>
-</body>
+<label class="meal-option">
+<input type="checkbox" class="meal-checkbox" name="meal" value="breakfast">
+Breakfast
+</label>
 
-<!-- Footer -->
+<label class="meal-option">
+<input type="checkbox" class="meal-checkbox" name="meal" value="lunch">
+Lunch
+</label>
+
+<label class="meal-option">
+<input type="checkbox" class="meal-checkbox" name="meal" value="dinner">
+Dinner
+</label>
+
+<label class="meal-option">
+<input type="checkbox" class="meal-checkbox" name="meal" value="supper">
+Supper
+</label>
+
+</div>
+
+<button type="submit" class="btn btn-success w-100">
+Mark Attendance
+</button>
+
+</form>
+
+<hr>
+
+<a href="{{ url_for('student_menu') }}" class="btn btn-outline-primary">View Today's Menu</a>
+
+<a href="{{ url_for('home') }}" class="btn btn-secondary">Back to Home</a>
+
+<a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+
+</div>
+
 <footer>
-  <p>&copy; 2025 Hostel Food Management System</p>
-  <p>Developed by <strong>Shafkat Zahoor</strong></p>
+<p>&copy; 2025 Hostel Food Management System</p>
+<p>Developed by <strong>Shafkat Zahoor</strong> & <strong>Bhat Irshad</strong></p>
 </footer>
 
+<script>
+
+const selectAll = document.getElementById("select_all");
+const mealCheckboxes = document.querySelectorAll(".meal-checkbox");
+
+selectAll.addEventListener("change", function(){
+
+mealCheckboxes.forEach(cb => {
+cb.checked = selectAll.checked;
+});
+
+});
+
+</script>
+
+</body>
 </html>
