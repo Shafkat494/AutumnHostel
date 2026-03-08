@@ -8,13 +8,27 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-body {
-    background: linear-gradient(135deg,#b33900,#ff7b00,#e63946);
-    min-height: 100vh;
+/* Full-height layout */
+html, body {
+    height: 100%;
+    margin: 0;
     font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg,#b33900,#ff7b00,#e63946);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
     color: white;
     display: flex;
     flex-direction: column;
+}
+
+/* Wrapper to push footer down */
+.wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 20px 0 0 0;
 }
 
 /* Navbar */
@@ -23,6 +37,9 @@ body {
     backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(255,255,255,0.2);
     box-shadow: 0 6px 25px rgba(0,0,0,0.35);
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 .navbar-brand {
     font-weight: 700;
@@ -39,6 +56,7 @@ body {
     font-weight: 700;
     letter-spacing: 1px;
     margin-bottom: 35px;
+    text-align: center;
 }
 
 /* Glass Cards */
@@ -81,53 +99,43 @@ body {
     font-weight: 600;
     padding: 11px;
     border-radius: 12px;
+    transition: transform 0.2s ease;
 }
-.btn-success:hover {
-    transform: translateY(-2px);
-}
+.btn-success:hover { transform: translateY(-2px); }
+
 .btn-danger {
     background: linear-gradient(135deg,#e63946,#b22222);
     border: none;
     border-radius: 8px;
+    transition: transform 0.2s ease;
 }
-.btn-danger:hover {
-    transform: translateY(-2px);
-}
+.btn-danger:hover { transform: translateY(-2px); }
+
 .btn-secondary {
     background: rgba(255,255,255,0.2);
     border: none;
     border-radius: 10px;
 }
-.btn-secondary:hover {
-    background: rgba(255,255,255,0.35);
-}
+.btn-secondary:hover { background: rgba(255,255,255,0.35); }
 
-/* Table */
-.table {
-    color: white;
-    border-radius: 15px;
-    overflow: hidden;
+/* Table/Lists */
+ul {
+    padding-left: 20px;
 }
-.table thead {
-    background: rgba(255,255,255,0.2);
-}
-.table tbody tr {
-    transition: 0.25s;
-}
-.table tbody tr:hover {
-    background: rgba(255,255,255,0.1);
+ul li {
+    margin-bottom: 6px;
 }
 
 /* Footer */
 footer {
-    margin-top: 40px;
     text-align: center;
-    font-size: 14px;
+    padding: 15px 0;
+    background: rgba(0,0,0,0.3);
     color: #ffe6d0;
+    flex-shrink: 0;
+    margin-top: auto;
 }
-footer strong {
-    color: white;
-}
+footer strong { color: white; }
 
 /* Responsive */
 @media(max-width:576px){
@@ -147,10 +155,10 @@ footer strong {
     </div>
 </nav>
 
-<!-- Main Container -->
-<div class="container mt-5">
+<!-- Main Wrapper -->
+<div class="wrapper container">
 
-<h1 class="text-center page-title">🍽️ Manage Weekly Menu</h1>
+<h1 class="page-title">🍽️ Manage Weekly Menu</h1>
 
 <!-- Back to Home -->
 <div class="text-center mb-4">
@@ -162,8 +170,6 @@ footer strong {
 <div class="card p-4 mb-5">
     <h4 class="mb-3">➕ Add Menu Items for a Day</h4>
     <form method="POST">
-
-        <!-- Day Selection -->
         <div class="mb-3">
             <label class="form-label">Select Day</label>
             <select class="form-select" name="day" required>
@@ -173,15 +179,12 @@ footer strong {
                 {% endfor %}
             </select>
         </div>
-
-        <!-- Meals Input -->
         {% for meal in ['Breakfast','Lunch','Dinner','Supper'] %}
         <div class="mb-3">
             <label class="form-label">{{ meal }}</label>
             <input type="text" class="form-control" name="meal_{{ meal.lower() }}" placeholder="Enter items for {{ meal }}">
         </div>
         {% endfor %}
-
         <button type="submit" class="btn btn-success mt-3 w-100">Save Menu</button>
     </form>
 </div>
