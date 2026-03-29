@@ -112,6 +112,10 @@ background:linear-gradient(135deg,#f39c12,#e67e22);
 background:linear-gradient(135deg,#c0392b,#922b21);
 }
 
+.card-bg-manager{
+background:linear-gradient(135deg,#a0522d,#8b4513);
+}
+
 /* Footer */
 
 footer{
@@ -248,6 +252,22 @@ Analyze student feedback
 
 </div>
 
+<div class="col-lg-3 col-md-4 col-sm-6">
+
+<a href="{{ url_for('create_manager') }}" class="card-action card-bg-manager text-center">
+
+<i class="fas fa-user-plus"></i>
+
+<div class="card-title">Create Manager</div>
+
+<div class="card-sub">
+Add new manager accounts
+</div>
+
+</a>
+
+</div>
+
 
 <div class="col-lg-3 col-md-4 col-sm-6">
 
@@ -277,8 +297,6 @@ Sign out of the admin account
 <p>
 Developed by
 <strong>Shafkat Zahoor</strong>
-&
-<strong>Bhat Irshad</strong>
 </p>
 
 </footer>

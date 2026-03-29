@@ -9,8 +9,6 @@ from sqlalchemy import extract, func
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev_secret_key_change_this')
 
-# ------------------ Database Configuration ------------------
-
 # ------------------ Database Configuration ------------------S
 
 # Get the absolute path to the current directory
@@ -43,11 +41,6 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
 
 # Initialize SQLAlchemy
 db = SQLAlchemy(app)
-# ------------------------------------------------------------
-
-
-# ------------------------------------------------------------
-
 
 # ------------------ Database Models ------------------
 
@@ -89,11 +82,6 @@ class Menu(db.Model):
     item = db.Column(db.String(100), nullable=False)
     food_type = db.Column(db.String(20))
 
-# class Attendance(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     student_id = db.Column(db.Integer, db.ForeignKey('student.id', ondelete='CASCADE'), nullable=False)
-#     date = db.Column(db.Date, nullable=False)
-
 class Attendance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
@@ -102,9 +90,6 @@ class Attendance(db.Model):
     lunch = db.Column(db.Boolean, default=False)
     dinner = db.Column(db.Boolean, default=False)
     supper = db.Column(db.Boolean, default=False)
-
-
-
 
 class AllergyReport(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -125,18 +110,6 @@ class Feedback(db.Model):
 
 with app.app_context():
     db.create_all()
-
-    if not User.query.filter_by(username='admin').first():
-        admin = User(username='admin', role='admin', full_name='Administrator')
-        admin.set_password('admin123')
-        db.session.add(admin)
-        db.session.commit()
-
-    if not User.query.filter_by(username='manager').first():
-        manager = User(username='manager', role='manager', full_name='Food Manager')
-        manager.set_password('manager123')
-        db.session.add(manager)
-        db.session.commit()
 
 # ------------------ Role Decorator ------------------
 
@@ -180,8 +153,6 @@ def home():
 
 
 # ------------------ Authentication ------------------
-
-
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -228,6 +199,95 @@ def logout():
     session.clear()
     return redirect(url_for('home'))
 
+# ------------------new changes-------------------
+
+@app.route('/admin_signup', methods=['GET','POST'])
+def admin_signup():
+
+    if request.method == 'POST':
+
+        username = request.form['username']
+        password = request.form['password']
+        admin_key = request.form['admin_key']
+
+        # 🔐 YOUR SECRET KEY
+        SECRET_KEY = "myadmin123"
+
+        if admin_key != SECRET_KEY:
+            flash("Invalid Admin Key!", "danger")
+            return redirect(url_for('admin_signup'))
+
+        # Create admin
+        user = User(username=username, role='admin')
+        user.set_password(password)
+
+        db.session.add(user)
+        db.session.commit()
+
+        flash("Admin account created successfully!", "success")
+        return redirect(url_for('login'))
+
+    return render_template('admin_signup.html')
+
+# @app.route('/register_admin', methods=['GET', 'POST'])
+# def register_admin():
+#     if request.method == 'POST':
+#         username = request.form['username']
+#         password = request.form['password']
+#         full_name = request.form['full_name']
+
+    #     # Check if already exists
+    #     if User.query.filter_by(username=username).first():
+    #         flash("Username already exists!", "danger")
+    #         return redirect(url_for('register_admin'))
+
+    #     # Create admin
+    #     admin = User(
+    #         username=username,
+    #         role='admin',
+    #         full_name=full_name
+    #     )
+    #     admin.set_password(password)
+
+    #     db.session.add(admin)
+    #     db.session.commit()
+
+    #     flash("Admin created successfully! Now login.", "success")
+    #     return redirect(url_for('login'))
+
+    # return render_template('register_admin.html')
+
+# ----------------- manager creation (new change) ------------------
+
+@app.route('/create_manager', methods=['GET', 'POST'])
+@role_required('admin')
+def create_manager():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        full_name = request.form['full_name']
+
+        # Check if username exists
+        if User.query.filter_by(username=username).first():
+            flash("Username already exists!", "danger")
+            return redirect(url_for('create_manager'))
+
+        # Create manager
+        manager = User(
+            username=username,
+            role='manager',
+            full_name=full_name
+        )
+        manager.set_password(password)
+
+        db.session.add(manager)
+        db.session.commit()
+
+        flash("Manager created successfully!", "success")
+        return redirect(url_for('admin_dashboard'))
+
+    return render_template('create_manager.html')
+ 
 # ------------------ Dashboards ------------------
 
 @app.route('/admin_dashboard')
