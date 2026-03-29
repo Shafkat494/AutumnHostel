@@ -211,7 +211,7 @@ def admin_signup():
         admin_key = request.form['admin_key']
 
         # 🔐 YOUR SECRET KEY
-        SECRET_KEY = "myadmin123"
+        SECRET_KEY = "longing"
 
         if admin_key != SECRET_KEY:
             flash("Invalid Admin Key!", "danger")
@@ -228,34 +228,6 @@ def admin_signup():
         return redirect(url_for('login'))
 
     return render_template('admin_signup.html')
-
-# @app.route('/register_admin', methods=['GET', 'POST'])
-# def register_admin():
-#     if request.method == 'POST':
-#         username = request.form['username']
-#         password = request.form['password']
-#         full_name = request.form['full_name']
-
-    #     # Check if already exists
-    #     if User.query.filter_by(username=username).first():
-    #         flash("Username already exists!", "danger")
-    #         return redirect(url_for('register_admin'))
-
-    #     # Create admin
-    #     admin = User(
-    #         username=username,
-    #         role='admin',
-    #         full_name=full_name
-    #     )
-    #     admin.set_password(password)
-
-    #     db.session.add(admin)
-    #     db.session.commit()
-
-    #     flash("Admin created successfully! Now login.", "success")
-    #     return redirect(url_for('login'))
-
-    # return render_template('register_admin.html')
 
 # ----------------- manager creation (new change) ------------------
 
