@@ -292,7 +292,7 @@ def students():
         name = request.form['name']
         room = request.form['room']
         allergies = request.form['allergies']
-        food_type = request.form['food_type']
+        food_type = request.form.get('food_type')
         username = request.form.get('username')
         password = request.form.get('password')
 
