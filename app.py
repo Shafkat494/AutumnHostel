@@ -82,6 +82,10 @@ class Menu(db.Model):
     item = db.Column(db.String(100), nullable=False)
     food_type = db.Column(db.String(20))
 
+class MasterMenu(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    item = db.Column(db.String(100), nullable=False, unique=True)
+
 class Attendance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
@@ -342,21 +346,29 @@ def menu():
 
         # Iterate over the four meals
         for meal in ['breakfast', 'lunch', 'dinner', 'supper']:
-            items_text = request.form.get(f'meal_{meal}', '').strip()
-            if items_text:
-                # Split multiple items by comma
-                items_list = [i.strip() for i in items_text.split(',') if i.strip()]
-                for item in items_list:
-                    new_menu = Menu(day=day, meal=meal.capitalize(), item=item)
-                    db.session.add(new_menu)
+            selected_items = request.form.getlist(f'meal_{meal}')
 
+            for item in selected_items:
+                new_menu = Menu(
+                    day=day,
+                    meal=meal.capitalize(),
+                    item=item
+                )
+                db.session.add(new_menu)
+                
         db.session.commit()
         flash(f"Menu saved for {day}.", "success")
         return redirect(url_for('menu'))
 
     # GET request: show all menu items
     all_items = Menu.query.order_by(Menu.day, Menu.meal).all()
-    return render_template('menu.html', menus=all_items)
+    master_items = MasterMenu.query.all()
+
+    return render_template(
+        'menu.html',
+        menus=all_items,
+        items=master_items
+    )
 
 @app.route('/menu/delete/<int:item_id>', methods=['POST'])
 @role_required('admin', 'manager')
@@ -699,6 +711,41 @@ def delete_feedback(feedback_id):
     flash("Feedback deleted successfully.", "success")
 
     return redirect(url_for('student_feedback'))
+
+@app.route('/admin_master_menu', methods=['GET', 'POST'])
+@role_required('admin')
+def admin_master_menu():
+    if request.method == 'POST':
+        item = request.form['item'].strip()
+
+        # prevent duplicates
+        if MasterMenu.query.filter_by(item=item).first():
+            flash("Item already exists!", "warning")
+            return redirect(url_for('admin_master_menu'))
+
+        new_item = MasterMenu(item=item)
+        db.session.add(new_item)
+        db.session.commit()
+
+        flash("Item added successfully!", "success")
+        return redirect(url_for('admin_master_menu'))
+
+    items = MasterMenu.query.all()
+    return render_template('admin_master_menu.html', items=items)
+
+@app.route('/delete_master_item/<int:item_id>', methods=['POST'])
+@role_required('admin')
+def delete_master_item(item_id):
+    item = MasterMenu.query.get(item_id)
+
+    if item:
+        db.session.delete(item)
+        db.session.commit()
+        flash("Item deleted!", "success")
+    else:
+        flash("Item not found!", "danger")
+
+    return redirect(url_for('admin_master_menu'))
 
 # ------------------ Run App ------------------
 
