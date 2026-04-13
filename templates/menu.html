@@ -212,9 +212,11 @@ footer strong { color: white; }
                 <li>
                     {{ menu.item }}
                     {% if session.role in ['admin','manager'] %}
-                    <form action="{{ url_for('delete_menu', item_id=menu.id) }}" method="POST" style="display:inline;">
-                        <button type="submit" class="btn btn-danger btn-sm ms-2">Delete</button>
-                    </form>
+                    <button 
+                        class="btn btn-danger btn-sm ms-2 delete-btn" 
+                        data-id="{{ menu.id }}">
+                        Delete
+                    </button>
                     {% endif %}
                 </li>
                 {% endif %}
@@ -233,6 +235,40 @@ footer strong { color: white; }
     <p>&copy; 2025 Hostel Food Management System</p>
     <p>Developed by <strong>Shafkat Zahoor</strong> & <strong>Bhat Irshad</strong></p>
 </footer>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".delete-btn").forEach(button => {
+        button.addEventListener("click", function() {
+
+            const itemId = this.getAttribute("data-id");
+            const listItem = this.closest("li");
+            const ul = listItem.parentElement;
+
+            fetch(`/menu/delete/${itemId}`, {
+                method: "POST"
+            })
+            .then(response => {
+                if (response.ok) {
+                    listItem.remove();
+
+                    // ✅ Check if list is empty now
+                    if (ul.children.length === 0) {
+                        const emptyMsg = document.createElement("li");
+                        emptyMsg.className = "text-light";
+                        emptyMsg.innerHTML = "<em>No items yet</em>";
+                        ul.appendChild(emptyMsg);
+                    }
+
+                } else {
+                    alert("Error deleting item");
+                }
+            });
+
+        });
+    });
+});
+</script>
 
 </body>
 </html>

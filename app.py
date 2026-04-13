@@ -355,7 +355,7 @@ def menu():
                     item=item
                 )
                 db.session.add(new_menu)
-                
+
         db.session.commit()
         flash(f"Menu saved for {day}.", "success")
         return redirect(url_for('menu'))
@@ -376,7 +376,7 @@ def delete_menu(item_id):
     item = Menu.query.get_or_404(item_id)
     db.session.delete(item)
     db.session.commit()
-    return redirect(url_for('menu'))
+    return '', 204
 
 # ------------------ Attendance ------------------
 
