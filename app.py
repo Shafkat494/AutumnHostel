@@ -335,31 +335,34 @@ def clear_day():
 @role_required('admin', 'manager')
 def menu():
     if request.method == 'POST':
-        # Get selected day
+
         day = request.form.get('day')
         if not day:
-            flash("Please select a day.", "warning")
-            return redirect(url_for('menu'))
+            return {'status': 'error'}, 400
 
-        # Store the selected day in session for convenience
-        session['selected_day'] = day
+        added_items = []
 
-        # Iterate over the four meals
         for meal in ['breakfast', 'lunch', 'dinner', 'supper']:
-            selected_items = request.form.getlist(f'meal_{meal}')
+            item = request.form.get(f'meal_{meal}')
 
-            for item in selected_items:
+            if item:
                 new_menu = Menu(
                     day=day,
                     meal=meal.capitalize(),
                     item=item
                 )
                 db.session.add(new_menu)
+                db.session.flush()
+
+                added_items.append({
+                    "id": new_menu.id,
+                    "meal": meal,
+                    "item": item
+                })
 
         db.session.commit()
-        flash(f"Menu saved for {day}.", "success")
-        return redirect(url_for('menu'))
 
+        return {"status": "success", "items": added_items}
     # GET request: show all menu items
     all_items = Menu.query.order_by(Menu.day, Menu.meal).all()
     master_items = MasterMenu.query.all()

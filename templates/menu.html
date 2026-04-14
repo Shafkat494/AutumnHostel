@@ -169,13 +169,16 @@ footer strong { color: white; }
 {% if session.role in ['admin', 'manager'] %}
 <div class="card p-4 mb-5">
     <h4 class="mb-3">➕ Add Menu Items for a Day</h4>
-    <form method="POST">
+    <div id="successMsg" class="alert alert-success text-center" style="display:none;">
+        ✅ Menu saved successfully!
+    </div>
+    <form method="POST" id="menuForm">
         <div class="mb-3">
             <label class="form-label">Select Day</label>
             <select class="form-select" name="day" required>
-                <option value="">Select Day</option>
+                <option value="" selected disabled>Select Day</option>
                 {% for d in ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'] %}
-                <option value="{{ d }}" {% if session.get('selected_day') == d %}selected{% endif %}>{{ d }}</option>
+                <option value="{{ d }}">{{ d }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -238,35 +241,123 @@ footer strong { color: white; }
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    document.querySelectorAll(".delete-btn").forEach(button => {
-        button.addEventListener("click", function() {
 
-            const itemId = this.getAttribute("data-id");
-            const listItem = this.closest("li");
+    const form = document.getElementById("menuForm");
+    const successMsg = document.getElementById("successMsg");
+
+    // ✅ ADD MENU (LIVE UPDATE)
+    form.addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const day = formData.get("day");
+
+        fetch("/menu", {
+            method: "POST",
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+
+            if (data.status === "success") {
+
+                // ✅ SUCCESS MESSAGE
+                successMsg.innerHTML = `✅ Menu set for ${day}!`;
+                successMsg.style.display = "block";
+
+                setTimeout(() => {
+                    successMsg.style.display = "none";
+                }, 3000);
+
+                // 🔥 USE BACKEND DATA (IMPORTANT)
+                data.items.forEach(entry => {
+
+                    const meal = entry.meal;   // breakfast, lunch...
+                    const value = entry.item;
+                    const id = entry.id;
+
+                    // ✅ find correct DAY card
+                    const dayHeadings = document.querySelectorAll("h3");
+
+                    dayHeadings.forEach(dayHeading => {
+                        if (dayHeading.innerText.includes(day)) {
+
+                            const card = dayHeading.closest(".card");
+
+                            const mealHeadings = card.querySelectorAll("h5");
+
+                            mealHeadings.forEach(h => {
+
+                                if (h.innerText.toLowerCase() === meal) {
+
+                                    const ul = h.nextElementSibling;
+
+                                    // remove "No items yet"
+                                    if (ul.innerText.includes("No items yet")) {
+                                        ul.innerHTML = "";
+                                    }
+
+                                    // ✅ create li with delete button
+                                    const li = document.createElement("li");
+
+                                    li.innerHTML = `
+                                        ${value}
+                                        <button 
+                                            class="btn btn-danger btn-sm ms-2 delete-btn" 
+                                            data-id="${id}">
+                                            Delete
+                                        </button>
+                                    `;
+
+                                    ul.appendChild(li);
+                                }
+
+                            });
+
+                        }
+                    });
+
+                });
+
+                form.reset();
+            }
+
+        })
+        .catch(err => console.error("Add error:", err));
+    });
+
+
+    // ✅ DELETE MENU (NO CHANGE BUT CLEAN)
+    document.addEventListener("click", function(e) {
+
+        if (e.target.classList.contains("delete-btn")) {
+
+            const btn = e.target;
+            const itemId = btn.getAttribute("data-id");
+            const listItem = btn.closest("li");
             const ul = listItem.parentElement;
 
             fetch(`/menu/delete/${itemId}`, {
                 method: "POST"
             })
-            .then(response => {
-                if (response.ok) {
+            .then(res => {
+                if (res.ok) {
+
                     listItem.remove();
 
-                    // ✅ Check if list is empty now
                     if (ul.children.length === 0) {
                         const emptyMsg = document.createElement("li");
                         emptyMsg.className = "text-light";
                         emptyMsg.innerHTML = "<em>No items yet</em>";
                         ul.appendChild(emptyMsg);
                     }
-
-                } else {
-                    alert("Error deleting item");
                 }
-            });
+            })
+            .catch(err => console.error("Delete error:", err));
+        }
 
-        });
     });
+
 });
 </script>
 
