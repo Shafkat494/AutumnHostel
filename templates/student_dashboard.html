@@ -64,6 +64,15 @@ border:1px solid rgba(255,255,255,0.25);
 border-radius:18px;
 box-shadow:0 15px 45px rgba(0,0,0,0.35);
 transition:all 0.4s ease;
+flex:1;
+display:flex;
+flex-direction:column;
+justify-content:space-between;
+min-height:160px;
+}
+
+.row.g-4 > div{
+    display:flex;
 }
 
 .card:hover{
@@ -78,6 +87,14 @@ margin-bottom:10px;
 
 .card p{
 color:#ffe4c4;
+}
+
+.card i{
+    opacity: 0.8;
+}
+
+.card a{
+    margin-top:auto;
 }
 
 /* Buttons */
@@ -143,108 +160,116 @@ margin:0 10px;
 
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark">
-<div class="container-fluid">
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand">Student Dashboard</a>
 
-<a class="navbar-brand">Student Dashboard</a>
+            <div class="d-flex">
+                <span class="navbar-text me-3">
+                Hello, {{ session['username'] }}
+                </span>
 
-<div class="d-flex">
-<span class="navbar-text me-3">
-Hello, {{ session['username'] }}
-</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
+                Logout
+                </a>
 
-<a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
-Logout
-</a>
+            </div>
 
-</div>
-
-</div>
-</nav>
+        </div>
+    </nav>
 
 
-<div class="main-content">
+    <div class="main-content">
 
-<div class="container py-5">
+        <div class="container py-5">
 
-<div class="text-center mb-5">
+            <div class="text-center mb-5">
 
-<h2 class="dashboard-title">
-Welcome to Your Dashboard
-</h2>
+                <h2 class="dashboard-title">
+                    Welcome to Your Dashboard
+                </h2>
 
-<p class="dashboard-subtitle">
-Manage your hostel dining activities easily
-</p>
+                <p class="dashboard-subtitle">
+                    Manage your hostel dining activities easily
+                </p>
 
-</div>
+            </div>
 
-<div class="row g-4 justify-content-center">
+            <div class="row g-4 justify-content-center">
 
-<div class="col-md-6">
+                <div class="col-md-4">
 
-<div class="card text-center p-4">
+                    <div class="card text-center p-4">
+                        <h5>Mark Attendance</h5>
 
-<h5>Mark Attendance</h5>
+                        <p>Mark your attendance for today's meals.</p>
 
-<p>Mark your attendance for today's meals.</p>
+                        <a href="{{ url_for('student_attendance') }}" class="btn btn-success">
+                        Go
+                        </a>
+                    </div>
 
-<a href="{{ url_for('student_attendance') }}" class="btn btn-success">
-Go
-</a>
+                </div>
 
-</div>
+                <div class="col-md-4">
 
-</div>
+                    <div class="card text-center p-4">
+                        <h5>View Menu</h5>
 
-<div class="col-md-6">
+                        <p>Check today's meal menu.</p>
 
-<div class="card text-center p-4">
+                        <a href="{{ url_for('student_menu') }}" class="btn btn-success">
+                        Go
+                        </a>
+                    </div>
 
-<h5>View Menu</h5>
+                </div>
 
-<p>Check today's meal menu.</p>
+                <div class="col-md-4">
 
-<a href="{{ url_for('student_menu') }}" class="btn btn-success">
-Go
-</a>
+                    <div class="card text-center p-4">
+                        <h5>Give Feedback</h5>
 
-</div>
+                        <p>Share your feedback with hostel management.</p>
 
-</div>
+                        <a href="{{ url_for('student_feedback') }}" class="btn btn-success">
+                        Go
+                        </a>
+                    </div>
 
-<div class="col-md-4">
+                </div>
 
-<div class="card text-center p-4">
+                <div class="col-md-4">
+                    <div class="card text-center p-4">
+                        <h5>
+                            <i class="fas fa-file-signature me-2"></i>
+                            Request Permission
+                        </h5>
 
-<h5>Give Feedback</h5>
+                        <p>
+                            Apply for leave or late entry approval easily.
+                        </p>
 
-<p>Share your feedback with hostel management.</p>
+                        <a href="{{ url_for('student_request') }}" class="btn btn-success">
+                            Go
+                        </a>
+                    </div>
+                </div>
 
-<a href="{{ url_for('student_feedback') }}" class="btn btn-success">
-Go
-</a>
+            </div>
 
-</div>
+        </div>
 
-</div>
+    </div>
 
-</div>
+    <footer>
+        <p>© 2025 Hostel Dining Management</p>
 
-</div>
-
-</div>
-
-<footer>
-
-<p>© 2025 Hostel Dining Management</p>
-
-<p>
-Developed by
-<strong>Shafkat Zahoor</strong> & <strong>Bhat Irshad</strong>
-</p>
-
-</footer>
+        <p>
+        Developed by
+        <strong>Shafkat Zahoor</strong> & <strong>Bhat Irshad</strong>
+        </p>
+    </footer>
 
 </body>
 </html>

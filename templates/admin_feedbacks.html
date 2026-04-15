@@ -8,7 +8,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-/* Full-height layout */
 html, body {
     height: 100%;
     margin: 0;
@@ -22,7 +21,6 @@ html, body {
     flex-direction: column;
 }
 
-/* Wrapper to push footer down */
 .wrapper {
     flex: 1;
     display: flex;
@@ -45,14 +43,12 @@ html, body {
     color:#fff !important;
 }
 
-/* Page Title */
 h2{
     font-weight:700;
     margin-bottom:35px;
     text-align:center;
 }
 
-/* Feedback Cards */
 .feedback-card{
     background:rgba(255,255,255,0.12);
     backdrop-filter:blur(14px);
@@ -60,39 +56,24 @@ h2{
     padding:20px;
     margin-bottom:20px;
     border:1px solid rgba(255,255,255,0.25);
-    box-shadow:0 15px 45px rgba(0,0,0,0.4);
-    transition:all 0.35s ease;
-    animation:fadeInUp 0.6s ease;
-}
-.feedback-card:hover{
-    transform:translateY(-6px) scale(1.01);
-    box-shadow:0 20px 60px rgba(0,0,0,0.45);
 }
 
-/* Feedback Header */
 .feedback-header{
     font-weight:600;
-    font-size:1.05rem;
     color:#ffe6d0;
     margin-bottom:10px;
 }
 
-/* Message */
 .feedback-message{
     color:#fff;
     margin-bottom:8px;
-    line-height:1.5;
-    word-wrap:break-word;
-    overflow-wrap:break-word;
 }
 
-/* Date */
 .feedback-date{
     font-size:0.85rem;
     color:#ffd6b3;
 }
 
-/* No Feedback */
 .no-feedback{
     text-align:center;
     color:#ffe6d0;
@@ -100,79 +81,68 @@ h2{
     margin-top:50px;
 }
 
-/* Footer */
 footer{
     text-align:center;
     padding:15px 0;
     background: rgba(0,0,0,0.3);
     color: #ffe6d0;
-    flex-shrink: 0;
-    margin-top: auto;
-}
-
-/* Animation */
-@keyframes fadeInUp{
-    from{opacity:0; transform:translateY(20px);}
-    to{opacity:1; transform:translateY(0);}
-}
-
-/* Responsive */
-@media(max-width:576px){
-    .wrapper{
-        padding:10px;
-    }
-    .feedback-card{
-        padding:16px;
-    }
+    margin-top:auto;
 }
 </style>
 </head>
 
 <body>
 
-<nav class="navbar navbar-dark">
-<div class="container-fluid">
-<a class="navbar-brand" href="{{ url_for('admin_dashboard') }}">← Back to Dashboard</a>
-</div>
+<nav class="navbar navbar-expand-lg navbar-dark px-4">
+    <a class="navbar-brand">🏫 Hostel Food Management</a>
+    <div class="ms-auto d-flex align-items-center">
+        <span class="navbar-text me-3">👤 {{ session['username'] }}</span>
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">Logout</a>
+    </div>
 </nav>
+
+<!-- Back Button -->
+<div class="text-center mt-3 mb-2">
+    <a href="{{ url_for('home') }}" class="btn btn-secondary px-4 py-2">🏠 Back to Home</a>
+</div>
 
 <div class="wrapper container">
 
-<h2>All Student Feedbacks</h2>
+<h2>All Students Feedback</h2>
 
 {% if feedbacks %}
 
-{% for fb in feedbacks %}
-<div class="feedback-card">
+    {% for fb in feedbacks %}
+    <div class="feedback-card">
 
-<div class="feedback-header">
-From: {{ fb.student_name if fb.student_name else 'Anonymous' }}
-</div>
+        <div class="feedback-header">
+            From: {{ fb.student_name if fb.student_name else 'Anonymous' }}
+        </div>
 
-<div class="feedback-message">
-{{ fb.message }}
-</div>
+        <div class="feedback-message">
+            {{ fb.message }}
+        </div>
 
-<div class="feedback-date">
-Submitted on: {{ fb.created_at.strftime("%d %b %Y, %I:%M %p") }}
-</div>
+        <div class="feedback-date">
+            Submitted on: {{ fb.created_at.strftime("%d %b %Y, %I:%M %p") }}
+        </div>
 
-</div>
-{% endfor %}
+    </div>
+    {% endfor %}
 
 {% else %}
 
-<div class="no-feedback">
-No feedback submitted yet.
-</div>
+    <div class="no-feedback">
+        No feedback submitted yet.
+    </div>
 
 {% endif %}
 
 </div>
 
 <footer>
-<p>&copy; 2025 Hostel Food Management System</p>
-<p>Developed by <strong>Shafkat Zahoor</strong> & <strong>Bhat Irshad</strong></p>
+    <p>&copy; 2025 Hostel Food Management System</p>
+    <p>Developed by <strong>Shafkat Zahoor</strong> & <strong>Bhat Irshad</strong></p>
 </footer>
 
 </body>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Manage Requests</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg,#b33900,#ff7b00,#e63946);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    color: #fff;
+}
+
+/* Navbar (MATCHED WITH MANAGE STUDENTS) */
+.navbar {
+    background: rgba(0,0,0,0.25);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 6px 25px rgba(0,0,0,0.35);
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: #fff !important;
+}
+.navbar-text {
+    color: #ffe6d0;
+    font-weight: 500;
+}
+
+/* Wrapper */
+.wrapper {
+    flex: 1;
+    padding: 20px;
+    margin-top: 80px; /* IMPORTANT for fixed navbar */
+}
+
+/* Title */
+h2 {
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Request Card */
+.request-card {
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(14px);
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.25);
+}
+
+.request-header {
+    font-weight: 600;
+    color: #ffe6d0;
+    margin-bottom: 8px;
+}
+
+.request-text {
+    margin-bottom: 6px;
+}
+
+.badge {
+    font-size: 0.8rem;
+}
+
+/* Back button spacing like manage students */
+.back-btn {
+    text-align: center;
+    margin: 20px 0;
+}
+
+/* Footer (EXACT MATCH WITH MANAGE STUDENTS) */
+footer {
+    text-align: center;
+    padding: 15px 0;
+    background: rgba(0,0,0,0.3);
+    color: #ffe6d0;
+}
+</style>
+</head>
+
+<body>
+
+<!-- Navbar (UPDATED STYLE) -->
+<nav class="navbar navbar-expand-lg navbar-dark shadow-sm px-4">
+    <a class="navbar-brand">🏫 Hostel Food Management</a>
+
+    <div class="ms-auto d-flex align-items-center">
+        <span class="navbar-text me-3">👤 {{ session['username'] }}</span>
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">Logout</a>
+    </div>
+</nav>
+
+<div class="wrapper container">
+
+<!-- Back to Home (MATCHED STYLE) -->
+<div class="back-btn">
+    <a href="{{ url_for('home') }}" class="btn btn-secondary px-4 py-2">🏠 Back to Home</a>
+</div>
+
+<h2>Student Requests</h2>
+
+{% if requests %}
+
+{% for r, s in requests %}
+
+<div class="request-card">
+
+    <div class="request-header">
+        👤 {{ s.name }} | Room: {{ s.room }}
+    </div>
+
+    <div class="request-text">
+        <strong>Type:</strong> {{ r.type }}
+    </div>
+
+    <div class="request-text">
+        <strong>Reason:</strong> {{ r.reason }}
+    </div>
+
+    {% if r.from_date and r.to_date %}
+    <div class="request-text">
+        <strong>From:</strong> {{ r.from_date }} |
+        <strong>To:</strong> {{ r.to_date }}
+    </div>
+    {% endif %}
+
+    <div class="request-text">
+        <strong>Status:</strong>
+        {% if r.status == "Approved" %}
+            <span class="badge bg-success">Approved</span>
+        {% elif r.status == "Rejected" %}
+            <span class="badge bg-danger">Rejected</span>
+        {% else %}
+            <span class="badge bg-warning text-dark">Pending</span>
+        {% endif %}
+    </div>
+
+    {% if r.status == "Pending" %}
+    <form action="{{ url_for('approve_request', req_id=r.id) }}" method="POST" style="display:inline;">
+        <button class="btn btn-success btn-sm">Approve</button>
+    </form>
+
+    <form action="{{ url_for('reject_request', req_id=r.id) }}" method="POST" style="display:inline;">
+        <button class="btn btn-danger btn-sm">Reject</button>
+    </form>
+    {% else %}
+        <span class="text-muted">No Action</span>
+    {% endif %}
+
+</div>
+
+{% endfor %}
+
+{% else %}
+<div class="text-center">No requests found</div>
+{% endif %}
+
+</div>
+
+<!-- FOOTER (EXACT SAME AS MANAGE STUDENTS) -->
+<footer>
+<p>&copy; 2025 Hostel Food Management System</p>
+<p>Developed by <strong>Shafkat Zahoor</strong> & <strong>Bhat Irshad</strong></p>
+</footer>
+
+</body>
+</html>

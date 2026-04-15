@@ -139,6 +139,11 @@ footer strong { color: white; }
 
 <h1 class="page-title">📊 Attendance Report</h1>
 
+<!-- Back to Home -->
+<div class="text-center mb-4">
+<a href="{{ url_for('home') }}" class="btn btn-secondary px-4 py-2">🏠 Back to Home</a>
+</div>
+
 <!-- Date Selector -->
 <div class="card mb-4">
     <form method="GET" class="d-flex flex-wrap align-items-center gap-2">
@@ -201,10 +206,6 @@ footer strong { color: white; }
     <a href="{{ url_for('attendance_summary', selected_date=selected_date.strftime('%Y-%m-%d')) }}" class="btn btn-success btn-lg">
         📅 View Full Attendance Summary
     </a>
-</div>
-
-<div class="text-center mt-4">
-    <a href="{{ url_for('manager_dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
 </div>
 
 </div>

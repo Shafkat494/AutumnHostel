@@ -109,6 +109,24 @@ class Feedback(db.Model):
     rating = db.Column(db.Integer)
     created_at = db.Column(db.Date, default=date.today)
 
+class LeaveRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer)
+    type = db.Column(db.String(50))  # home / late
+    reason = db.Column(db.String(255))
+    from_date = db.Column(db.Date)
+    to_date = db.Column(db.Date)
+    status = db.Column(db.String(20), default="Pending")
+
+class Room(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    room_number = db.Column(db.String(10))
+    capacity = db.Column(db.Integer)
+
+class RoomAllocation(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer)
+    room_id = db.Column(db.Integer)
 
 # ------------------ Initialize DB & Default Users ------------------
 
@@ -756,6 +774,102 @@ def delete_master_item(item_id):
         flash("Item not found!", "danger")
 
     return redirect(url_for('admin_master_menu'))
+
+# ----------------------- STUDENT REQUEST ROUTE --------------------------
+@app.route('/student_request', methods=['GET', 'POST'])
+@role_required('student')
+def student_request():
+
+    student = Student.query.get(session['user_id'])
+
+    if request.method == 'POST':
+        req_type = request.form.get('type')
+
+        # Handle "Other"
+        if req_type == "Other":
+            req_type = request.form.get('other_type')
+
+        reason = request.form.get('reason')
+        from_date = request.form.get('from_date')
+        to_date = request.form.get('to_date')
+
+        # Request types that NEED dates
+        needs_date = req_type in ["Leave", "Late Entry", "Gate Pass"]
+
+        # Basic validation
+        if not req_type or not reason:
+            flash("Please fill all required fields!", "danger")
+            return redirect(url_for('student_request'))
+
+        # Date validation only when required
+        if needs_date and (not from_date or not to_date):
+            flash("Dates are required for this request type!", "danger")
+            return redirect(url_for('student_request'))
+
+        # Safe date conversion
+        try:
+            from_dt = datetime.strptime(from_date, '%Y-%m-%d') if from_date else None
+            to_dt = datetime.strptime(to_date, '%Y-%m-%d') if to_date else None
+        except ValueError:
+            flash("Invalid date format!", "danger")
+            return redirect(url_for('student_request'))
+
+        # Create request
+        new_request = LeaveRequest(
+            student_id=student.id,
+            type=req_type,
+            reason=reason,
+            from_date=from_dt,
+            to_date=to_dt
+        )
+
+        db.session.add(new_request)
+        db.session.commit()
+
+        flash("Request submitted successfully ✅", "success")
+        return redirect(url_for('student_request'))
+
+    # Show student's own requests
+    requests = LeaveRequest.query.filter_by(student_id=student.id)\
+                                 .order_by(LeaveRequest.id.desc())\
+                                 .all()
+
+    return render_template('student_request.html', requests=requests)
+
+# ----------------------- ADMIN VIEW REQUESTS ------------------------
+@app.route('/admin/requests')
+@role_required('admin', 'manager')
+def admin_requests():
+
+    requests = db.session.query(LeaveRequest, Student).join(
+        Student, LeaveRequest.student_id == Student.id
+    ).order_by(LeaveRequest.id.desc()).all()
+
+    return render_template('admin_requests.html', requests=requests)
+
+# ----------------------- Approve Request -------------------------
+@app.route('/request/approve/<int:req_id>', methods=['POST'])
+@role_required('admin', 'manager')
+def approve_request(req_id):
+
+    req = LeaveRequest.query.get_or_404(req_id)
+    req.status = "Approved"
+
+    db.session.commit()
+
+    return redirect(url_for('admin_requests'))
+
+# ------------------------- REJECT REQUEST --------------------------
+@app.route('/request/reject/<int:req_id>', methods=['POST'])
+@role_required('admin', 'manager')
+def reject_request(req_id):
+
+    req = LeaveRequest.query.get_or_404(req_id)
+    req.status = "Rejected"
+
+    db.session.commit()
+
+    return redirect(url_for('admin_requests'))
 
 # ------------------ Run App ------------------
 
