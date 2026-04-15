@@ -28,7 +28,7 @@ flex:1;
 
 .navbar{
 background:rgba(0,0,0,0.25)!important;
-backdrop-filter:blur(12px);
+backdrop-filter:blur(8px);
 border-bottom:1px solid rgba(255,255,255,0.2);
 box-shadow:0 6px 25px rgba(0,0,0,0.3);
 }
@@ -59,7 +59,7 @@ color:#ffe4c4;
 
 .card{
 background:rgba(255,255,255,0.1);
-backdrop-filter:blur(18px);
+backdrop-filter:blur(10px);
 border:1px solid rgba(255,255,255,0.25);
 border-radius:18px;
 box-shadow:0 15px 45px rgba(0,0,0,0.35);
@@ -95,6 +95,23 @@ color:#ffe4c4;
 
 .card a{
     margin-top:auto;
+}
+
+.card a, .btn {
+    position: relative;
+    z-index: 2;
+}
+
+.navbar, .card {
+    position: relative;
+    z-index: 1;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
 }
 
 /* Buttons */
@@ -190,7 +207,7 @@ margin:0 10px;
                 </h2>
 
                 <p class="dashboard-subtitle">
-                    Manage your hostel dining activities easily
+                    Manage your hostel activities easily
                 </p>
 
             </div>

@@ -112,11 +112,12 @@ class Feedback(db.Model):
 class LeaveRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer)
-    type = db.Column(db.String(50))  # home / late
+    type = db.Column(db.String(50))
     reason = db.Column(db.String(255))
     from_date = db.Column(db.Date)
     to_date = db.Column(db.Date)
     status = db.Column(db.String(20), default="Pending")
+    admin_reply = db.Column(db.Text, nullable=True)
 
 class Room(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -820,7 +821,8 @@ def student_request():
             type=req_type,
             reason=reason,
             from_date=from_dt,
-            to_date=to_dt
+            to_date=to_dt,
+            status="Pending"
         )
 
         db.session.add(new_request)
@@ -853,10 +855,15 @@ def admin_requests():
 def approve_request(req_id):
 
     req = LeaveRequest.query.get_or_404(req_id)
-    req.status = "Approved"
+
+    APPROVAL_TYPES = ["Leave", "Late Entry", "Gate Pass"]
+
+    if req.type in APPROVAL_TYPES:
+        req.status = "Approved"
+    else:
+        flash("This request requires a reply, not approval.", "warning")
 
     db.session.commit()
-
     return redirect(url_for('admin_requests'))
 
 # ------------------------- REJECT REQUEST --------------------------
@@ -865,10 +872,43 @@ def approve_request(req_id):
 def reject_request(req_id):
 
     req = LeaveRequest.query.get_or_404(req_id)
-    req.status = "Rejected"
+
+    APPROVAL_TYPES = ["Leave", "Late Entry", "Gate Pass"]
+
+    if req.type in APPROVAL_TYPES:
+        req.status = "Rejected"
+    else:
+        flash("This request requires a reply, not rejection.", "warning")
+
+    db.session.commit()
+    return redirect(url_for('admin_requests'))
+
+# ----------------------- REPLY SUBMISSION -------------------------
+@app.route('/request/reply/<int:req_id>', methods=['POST'])
+@role_required('admin', 'manager')
+def reply_request(req_id):
+
+    req = LeaveRequest.query.get_or_404(req_id)
+
+    reply_text = request.form.get('reply', '').strip()
+
+    if not reply_text:
+        flash("Reply cannot be empty!", "danger")
+        return redirect(url_for('admin_requests'))
+
+    # Only allow reply for non-approval types
+    APPROVAL_TYPES = ["Leave", "Late Entry", "Gate Pass"]
+
+    if req.type in APPROVAL_TYPES:
+        flash("This request should be approved/rejected, not replied.", "warning")
+        return redirect(url_for('admin_requests'))
+
+    req.admin_reply = reply_text
+    req.status = "Replied"
 
     db.session.commit()
 
+    flash("Reply sent to student successfully ✅", "success")
     return redirect(url_for('admin_requests'))
 
 # ------------------ Run App ------------------

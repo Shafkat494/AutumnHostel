@@ -17,9 +17,11 @@ html, body {
     background-attachment: fixed;
     background-size: cover;
     color: #fff;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Navbar (MATCHED WITH MANAGE STUDENTS) */
+/* Navbar */
 .navbar {
     background: rgba(0,0,0,0.25);
     backdrop-filter: blur(12px);
@@ -30,11 +32,13 @@ html, body {
     width: 100%;
     z-index: 1000;
 }
+
 .navbar-brand {
     font-weight: 700;
     font-size: 1.3rem;
     color: #fff !important;
 }
+
 .navbar-text {
     color: #ffe6d0;
     font-weight: 500;
@@ -44,7 +48,7 @@ html, body {
 .wrapper {
     flex: 1;
     padding: 20px;
-    margin-top: 80px; /* IMPORTANT for fixed navbar */
+    margin-top: 80px;
 }
 
 /* Title */
@@ -54,7 +58,7 @@ h2 {
     margin-bottom: 30px;
 }
 
-/* Request Card */
+/* Card */
 .request-card {
     background: rgba(255,255,255,0.12);
     backdrop-filter: blur(14px);
@@ -64,28 +68,26 @@ h2 {
     border: 1px solid rgba(255,255,255,0.25);
 }
 
+/* Header */
 .request-header {
     font-weight: 600;
     color: #ffe6d0;
     margin-bottom: 8px;
 }
 
-.request-text {
-    margin-bottom: 6px;
+/* Type badge */
+.type-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    background: rgba(255,255,255,0.2);
+    margin-left: 8px;
 }
 
-.badge {
-    font-size: 0.8rem;
-}
-
-/* Back button spacing like manage students */
-.back-btn {
-    text-align: center;
-    margin: 20px 0;
-}
-
-/* Footer (EXACT MATCH WITH MANAGE STUDENTS) */
+/* Footer */
 footer {
+    margin-top: auto;
     text-align: center;
     padding: 15px 0;
     background: rgba(0,0,0,0.3);
@@ -96,7 +98,7 @@ footer {
 
 <body>
 
-<!-- Navbar (UPDATED STYLE) -->
+<!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark shadow-sm px-4">
     <a class="navbar-brand">🏫 Hostel Food Management</a>
 
@@ -108,8 +110,7 @@ footer {
 
 <div class="wrapper container">
 
-<!-- Back to Home (MATCHED STYLE) -->
-<div class="back-btn">
+<div class="text-center mb-4">
     <a href="{{ url_for('home') }}" class="btn btn-secondary px-4 py-2">🏠 Back to Home</a>
 </div>
 
@@ -123,44 +124,72 @@ footer {
 
     <div class="request-header">
         👤 {{ s.name }} | Room: {{ s.room }}
+        <span class="type-badge">{{ r.type }}</span>
     </div>
 
-    <div class="request-text">
-        <strong>Type:</strong> {{ r.type }}
-    </div>
-
-    <div class="request-text">
+    <div class="mb-2">
         <strong>Reason:</strong> {{ r.reason }}
     </div>
 
     {% if r.from_date and r.to_date %}
-    <div class="request-text">
+    <div class="mb-2">
         <strong>From:</strong> {{ r.from_date }} |
         <strong>To:</strong> {{ r.to_date }}
     </div>
     {% endif %}
 
-    <div class="request-text">
+    <div class="mb-2">
         <strong>Status:</strong>
         {% if r.status == "Approved" %}
             <span class="badge bg-success">Approved</span>
         {% elif r.status == "Rejected" %}
             <span class="badge bg-danger">Rejected</span>
+        {% elif r.status == "Replied" %}
+            <span class="badge bg-info">Replied</span>
         {% else %}
             <span class="badge bg-warning text-dark">Pending</span>
         {% endif %}
     </div>
 
-    {% if r.status == "Pending" %}
-    <form action="{{ url_for('approve_request', req_id=r.id) }}" method="POST" style="display:inline;">
-        <button class="btn btn-success btn-sm">Approve</button>
-    </form>
+    {% set approval_types = ['Leave', 'Late Entry', 'Gate Pass'] %}
 
-    <form action="{{ url_for('reject_request', req_id=r.id) }}" method="POST" style="display:inline;">
-        <button class="btn btn-danger btn-sm">Reject</button>
-    </form>
+    {% if r.status == "Pending" %}
+
+        {% if r.type in approval_types %}
+
+            <form action="{{ url_for('approve_request', req_id=r.id) }}" method="POST" style="display:inline;">
+                <button class="btn btn-success btn-sm">Approve</button>
+            </form>
+
+            <form action="{{ url_for('reject_request', req_id=r.id) }}" method="POST" style="display:inline;">
+                <button class="btn btn-danger btn-sm">Reject</button>
+            </form>
+
+        {% else %}
+
+            {% if r.admin_reply %}
+                <div class="alert alert-info p-2 mt-2">
+                    <strong>Reply:</strong> {{ r.admin_reply }}
+                </div>
+            {% else %}
+                <form action="{{ url_for('reply_request', req_id=r.id) }}" method="POST">
+                    <textarea name="reply" class="form-control mb-2" placeholder="Write reply..."></textarea>
+                    <button class="btn btn-primary btn-sm">Send Reply</button>
+                </form>
+            {% endif %}
+
+        {% endif %}
+
     {% else %}
-        <span class="text-muted">No Action</span>
+
+        {% if r.admin_reply %}
+            <div class="alert alert-info p-2 mt-2">
+                <strong>Reply:</strong> {{ r.admin_reply }}
+            </div>
+        {% else %}
+            <span class="text-muted">No Action Required</span>
+        {% endif %}
+
     {% endif %}
 
 </div>
@@ -173,7 +202,6 @@ footer {
 
 </div>
 
-<!-- FOOTER (EXACT SAME AS MANAGE STUDENTS) -->
 <footer>
 <p>&copy; 2025 Hostel Food Management System</p>
 <p>Developed by <strong>Shafkat Zahoor</strong> & <strong>Bhat Irshad</strong></p>

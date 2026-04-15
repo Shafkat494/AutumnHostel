@@ -9,7 +9,7 @@
 
 <style>
 
-/* Layout */
+/* Layout FIX (sticky footer) */
 html, body {
     height: 100%;
     margin: 0;
@@ -23,6 +23,7 @@ html, body {
     flex-direction: column;
 }
 
+/* Wrapper */
 .wrapper {
     flex: 1;
     display: flex;
@@ -37,10 +38,9 @@ html, body {
     backdrop-filter: blur(14px);
     border-radius: 20px;
     padding: 2rem;
-    max-width: 600px;
+    max-width: 700px;
     width: 100%;
     box-shadow: 0 15px 45px rgba(0,0,0,0.4);
-    animation: fadeInUp 0.8s ease;
 }
 
 /* Title */
@@ -76,17 +76,26 @@ select option{
     border-radius: 12px;
 }
 
-.btn-success:hover {
-    transform: translateY(-2px);
-}
-
 /* Table */
 .table {
     color: white;
 }
 
+/* Badges */
 .badge {
     font-size: 0.8rem;
+}
+
+/* 🔥 Admin reply box */
+.reply-box {
+    margin-top: 6px;
+    padding: 8px 12px;
+    background: linear-gradient(135deg,#ff7b00,#ff5400);
+    color: #fff;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: inline-block;
 }
 
 /* Footer */
@@ -116,6 +125,11 @@ footer {
 
 <body>
 
+<!-- BACK TO DASHBOARD -->
+<div class="top-nav text-center mt-3">
+    <a href="{{ url_for('home') }}" class="btn btn-secondary px-4 py-2">🏠 Back to Dashboard</a>
+</div>
+
 <div class="wrapper">
 
     <div class="card">
@@ -124,7 +138,6 @@ footer {
 
         <form method="POST">
 
-            <!-- TYPE -->
             <div class="mb-3">
                 <label>Request Type</label>
                 <select name="type" class="form-control" required>
@@ -140,43 +153,36 @@ footer {
                 </select>
             </div>
 
-            <!-- OTHER TYPE -->
             <div class="mb-3" id="otherBox" style="display:none;">
-                <label>Specify Request</label>
                 <input type="text" name="other_type" class="form-control" placeholder="Enter request type">
             </div>
 
-            <!-- DATE FIELDS -->
             <div id="dateFields">
                 <div class="mb-3">
-                    <label>From Date</label>
                     <input type="date" name="from_date" class="form-control">
                 </div>
-
                 <div class="mb-3">
-                    <label>To Date</label>
                     <input type="date" name="to_date" class="form-control">
                 </div>
             </div>
 
-            <!-- REASON -->
             <div class="mb-3">
-                <label>Reason</label>
                 <textarea name="reason" class="form-control" rows="3" placeholder="Enter reason..." required></textarea>
             </div>
 
-            <button class="btn btn-success w-100">
-                Submit Request
-            </button>
-
+            <button class="btn btn-success w-100">Submit Request</button>
         </form>
 
         <hr>
 
-        <!-- HISTORY -->
         <h5 class="text-center mb-3">Your Requests</h5>
 
-        <table class="table table-bordered">
+        <hr>
+
+        <h5 class="text-center mb-3">Permission Requests</h5>
+
+        <table class="table table-bordered text-center">
+
             <tr>
                 <th>Type</th>
                 <th>From</th>
@@ -184,11 +190,16 @@ footer {
                 <th>Status</th>
             </tr>
 
+            {% set approval_types = ['Leave', 'Late Entry', 'Gate Pass'] %}
+
             {% for r in requests %}
+            {% if r.type in approval_types %}
             <tr>
+
                 <td>{{ r.type }}</td>
                 <td>{{ r.from_date or '-' }}</td>
                 <td>{{ r.to_date or '-' }}</td>
+
                 <td>
                     {% if r.status == "Approved" %}
                         <span class="badge bg-success">Approved</span>
@@ -198,8 +209,56 @@ footer {
                         <span class="badge bg-warning text-dark">Pending</span>
                     {% endif %}
                 </td>
+
             </tr>
+            {% endif %}
             {% endfor %}
+
+        </table>
+
+
+        <hr>
+
+        <h5 class="text-center mb-3">Other Requests / Complaints</h5>
+
+        <table class="table table-bordered text-center">
+
+            <tr>
+                <th>Type</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th>Admin Reply</th>
+            </tr>
+
+            {% for r in requests %}
+            {% if r.type not in approval_types %}
+            <tr>
+
+                <td>{{ r.type }}</td>
+                <td>{{ r.reason }}</td>
+
+                <td>
+                    {% if r.status == "Replied" %}
+                        <span class="badge bg-info text-dark">Replied 💬</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">Pending</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if r.admin_reply %}
+                        <div class="reply-box">
+                            💬 {{ r.admin_reply }}
+                        </div>
+                    {% else %}
+                        <span class="text-muted">Waiting for reply</span>
+                    {% endif %}
+                </td>
+
+            </tr>
+            {% endif %}
+            {% endfor %}
+
         </table>
 
     </div>
@@ -221,10 +280,8 @@ const toDate = document.querySelector('input[name="to_date"]');
 function updateFormUI(){
     const value = typeSelect.value;
 
-    // Other field
     otherBox.style.display = (value === "Other") ? "block" : "none";
 
-    // Date logic
     const needsDate = ["Leave", "Late Entry", "Gate Pass"];
 
     if(needsDate.includes(value)){
