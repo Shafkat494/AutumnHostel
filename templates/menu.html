@@ -244,6 +244,19 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const form = document.getElementById("menuForm");
     const successMsg = document.getElementById("successMsg");
+    const today = new Date().toLocaleString('en-US', { 
+        weekday: 'long',
+        timeZone: 'Asia/Kolkata'
+    });
+
+    document.querySelectorAll("h3").forEach(h => {
+        if (h.innerText.includes(today)) {
+            const card = h.closest(".card");
+            card.style.border = "2px solid #fff";
+            card.style.boxShadow = "0 0 20px rgba(255,255,255,0.5)";
+            card.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+    });
 
     // ✅ ADD MENU (LIVE UPDATE)
     form.addEventListener("submit", function(e) {
@@ -288,16 +301,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
                             mealHeadings.forEach(h => {
 
-                                if (h.innerText.toLowerCase() === meal) {
+                                if (h.innerText.trim().toLowerCase() === meal) {
 
                                     const ul = h.nextElementSibling;
+                                    ul.innerHTML = "";
 
-                                    // remove "No items yet"
-                                    if (ul.innerText.includes("No items yet")) {
-                                        ul.innerHTML = "";
-                                    }
-
-                                    // ✅ create li with delete button
                                     const li = document.createElement("li");
 
                                     li.innerHTML = `

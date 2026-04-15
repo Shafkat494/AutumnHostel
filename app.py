@@ -346,6 +346,13 @@ def menu():
             item = request.form.get(f'meal_{meal}')
 
             if item:
+                # duplicate check
+                Menu.query.filter_by(
+                    day=day,
+                    meal=meal.capitalize()
+                ).delete()
+
+                # create new menu
                 new_menu = Menu(
                     day=day,
                     meal=meal.capitalize(),
