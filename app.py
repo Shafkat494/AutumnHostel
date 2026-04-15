@@ -118,6 +118,7 @@ class LeaveRequest(db.Model):
     to_date = db.Column(db.Date)
     status = db.Column(db.String(20), default="Pending")
     admin_reply = db.Column(db.Text, nullable=True)
+    seen_by_student = db.Column(db.Boolean, default=False)
 
 class Room(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -835,7 +836,6 @@ def student_request():
     requests = LeaveRequest.query.filter_by(student_id=student.id)\
                                  .order_by(LeaveRequest.id.desc())\
                                  .all()
-
     return render_template('student_request.html', requests=requests)
 
 # ----------------------- ADMIN VIEW REQUESTS ------------------------
@@ -889,7 +889,6 @@ def reject_request(req_id):
 def reply_request(req_id):
 
     req = LeaveRequest.query.get_or_404(req_id)
-
     reply_text = request.form.get('reply', '').strip()
 
     if not reply_text:
@@ -905,11 +904,24 @@ def reply_request(req_id):
 
     req.admin_reply = reply_text
     req.status = "Replied"
+    req.seen_by_student = False
 
     db.session.commit()
 
     flash("Reply sent to student successfully ✅", "success")
     return redirect(url_for('admin_requests'))
+
+# ----------------------- mark seen --------------------------
+@app.route('/mark_seen/<int:req_id>')
+@role_required('student')
+def mark_seen(req_id):
+    req = LeaveRequest.query.get(req_id)
+
+    if req and req.student_id == session['user_id']:
+        req.seen_by_student = True
+        db.session.commit()
+
+    return '', 204
 
 # ------------------ Run App ------------------
 

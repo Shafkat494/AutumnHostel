@@ -8,8 +8,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-
-/* Layout FIX (sticky footer) */
 html, body {
     height: 100%;
     margin: 0;
@@ -23,7 +21,6 @@ html, body {
     flex-direction: column;
 }
 
-/* Wrapper */
 .wrapper {
     flex: 1;
     display: flex;
@@ -32,7 +29,6 @@ html, body {
     padding: 20px;
 }
 
-/* Card */
 .card {
     background: rgba(255,255,255,0.12);
     backdrop-filter: blur(14px);
@@ -43,14 +39,12 @@ html, body {
     box-shadow: 0 15px 45px rgba(0,0,0,0.4);
 }
 
-/* Title */
 h3 {
     font-weight: 700;
     text-align: center;
     margin-bottom: 20px;
 }
 
-/* Inputs */
 input, select, textarea {
     background: rgba(255,255,255,0.15) !important;
     border: none !important;
@@ -67,7 +61,6 @@ select option{
     background:white;
 }
 
-/* Button */
 .btn-success {
     background: linear-gradient(135deg,#ff9f1c,#ff5400);
     border: none;
@@ -76,29 +69,31 @@ select option{
     border-radius: 12px;
 }
 
-/* Table */
 .table {
     color: white;
 }
 
-/* Badges */
 .badge {
     font-size: 0.8rem;
 }
 
-/* 🔥 Admin reply box */
+.badge.bg-danger {
+    background-color: #b91c1c !important;
+}
+
 .reply-box {
     margin-top: 6px;
     padding: 8px 12px;
-    background: linear-gradient(135deg,#ff7b00,#ff5400);
-    color: #fff;
+    background: rgba(255, 123, 0, 0.28);
+    border: 1px solid rgba(255, 123, 0, 0.6);
+    color: #4a1f0f;
     border-radius: 12px;
     font-size: 0.9rem;
     font-weight: 500;
     display: inline-block;
+    box-shadow: 0 0 8px rgba(255, 123, 0, 0.2);
 }
 
-/* Footer */
 footer {
     text-align: center;
     padding: 15px 10px;
@@ -107,162 +102,149 @@ footer {
     flex-shrink: 0;
 }
 
-/* Animation */
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Responsive */
 @media(max-width:480px) {
     .card {
         padding: 1.5rem;
     }
 }
-
 </style>
+
 </head>
 
 <body>
 
-<!-- BACK TO DASHBOARD -->
 <div class="top-nav text-center mt-3">
     <a href="{{ url_for('home') }}" class="btn btn-secondary px-4 py-2">🏠 Back to Dashboard</a>
 </div>
 
 <div class="wrapper">
+<div class="card">
 
-    <div class="card">
+<h3>Request Permission</h3>
 
-        <h3>Request Permission</h3>
-
-        <form method="POST">
-
-            <div class="mb-3">
-                <label>Request Type</label>
-                <select name="type" class="form-control" required>
-                    <option value="">Select</option>
-                    <option value="Leave">Leave</option>
-                    <option value="Late Entry">Late Entry</option>
-                    <option value="Room Change">Room Change</option>
-                    <option value="Maintenance Issue">Maintenance Issue</option>
-                    <option value="Medical Emergency">Medical Emergency</option>
-                    <option value="Mess Complaint">Mess Complaint</option>
-                    <option value="Gate Pass">Gate Pass</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
-
-            <div class="mb-3" id="otherBox" style="display:none;">
-                <input type="text" name="other_type" class="form-control" placeholder="Enter request type">
-            </div>
-
-            <div id="dateFields">
-                <div class="mb-3">
-                    <input type="date" name="from_date" class="form-control">
-                </div>
-                <div class="mb-3">
-                    <input type="date" name="to_date" class="form-control">
-                </div>
-            </div>
-
-            <div class="mb-3">
-                <textarea name="reason" class="form-control" rows="3" placeholder="Enter reason..." required></textarea>
-            </div>
-
-            <button class="btn btn-success w-100">Submit Request</button>
-        </form>
-
-        <hr>
-
-        <h5 class="text-center mb-3">Your Requests</h5>
-
-        <hr>
-
-        <h5 class="text-center mb-3">Permission Requests</h5>
-
-        <table class="table table-bordered text-center">
-
-            <tr>
-                <th>Type</th>
-                <th>From</th>
-                <th>To</th>
-                <th>Status</th>
-            </tr>
-
-            {% set approval_types = ['Leave', 'Late Entry', 'Gate Pass'] %}
-
-            {% for r in requests %}
-            {% if r.type in approval_types %}
-            <tr>
-
-                <td>{{ r.type }}</td>
-                <td>{{ r.from_date or '-' }}</td>
-                <td>{{ r.to_date or '-' }}</td>
-
-                <td>
-                    {% if r.status == "Approved" %}
-                        <span class="badge bg-success">Approved</span>
-                    {% elif r.status == "Rejected" %}
-                        <span class="badge bg-danger">Rejected</span>
-                    {% else %}
-                        <span class="badge bg-warning text-dark">Pending</span>
-                    {% endif %}
-                </td>
-
-            </tr>
-            {% endif %}
-            {% endfor %}
-
-        </table>
-
-
-        <hr>
-
-        <h5 class="text-center mb-3">Other Requests / Complaints</h5>
-
-        <table class="table table-bordered text-center">
-
-            <tr>
-                <th>Type</th>
-                <th>Reason</th>
-                <th>Status</th>
-                <th>Admin Reply</th>
-            </tr>
-
-            {% for r in requests %}
-            {% if r.type not in approval_types %}
-            <tr>
-
-                <td>{{ r.type }}</td>
-                <td>{{ r.reason }}</td>
-
-                <td>
-                    {% if r.status == "Replied" %}
-                        <span class="badge bg-info text-dark">Replied 💬</span>
-                    {% else %}
-                        <span class="badge bg-warning text-dark">Pending</span>
-                    {% endif %}
-                </td>
-
-                <td>
-                    {% if r.admin_reply %}
-                        <div class="reply-box">
-                            💬 {{ r.admin_reply }}
-                        </div>
-                    {% else %}
-                        <span class="text-muted">Waiting for reply</span>
-                    {% endif %}
-                </td>
-
-            </tr>
-            {% endif %}
-            {% endfor %}
-
-        </table>
-
+<form method="POST">
+    <div class="mb-3">
+        <label>Request Type</label>
+        <select name="type" class="form-control" required>
+            <option value="">Select</option>
+            <option value="Leave">Leave</option>
+            <option value="Late Entry">Late Entry</option>
+            <option value="Room Change">Room Change</option>
+            <option value="Maintenance Issue">Maintenance Issue</option>
+            <option value="Medical Emergency">Medical Emergency</option>
+            <option value="Mess Complaint">Mess Complaint</option>
+            <option value="Gate Pass">Gate Pass</option>
+            <option value="Other">Other</option>
+        </select>
     </div>
 
+    <div class="mb-3" id="otherBox" style="display:none;">
+        <input type="text" name="other_type" class="form-control" placeholder="Enter request type">
+    </div>
+
+    <div id="dateFields">
+        <div class="mb-3">
+            <input type="date" name="from_date" class="form-control">
+        </div>
+        <div class="mb-3">
+            <input type="date" name="to_date" class="form-control">
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <textarea name="reason" class="form-control" rows="3" placeholder="Enter reason..." required></textarea>
+    </div>
+
+    <button class="btn btn-success w-100">Submit Request</button>
+</form>
+
+<hr>
+
+<h5 class="text-center mb-3">Permission Requests</h5>
+
+<table class="table table-bordered text-center">
+<tr>
+    <th>Type</th>
+    <th>From</th>
+    <th>To</th>
+    <th>Status</th>
+</tr>
+
+{% set approval_types = ['Leave', 'Late Entry', 'Gate Pass'] %}
+
+{% for r in requests %}
+{% if r.type in approval_types %}
+<tr>
+    <td>{{ r.type }}</td>
+    <td>{{ r.from_date or '-' }}</td>
+    <td>{{ r.to_date or '-' }}</td>
+    <td>
+        {% if r.status == "Approved" %}
+            <span class="badge bg-success">Approved</span>
+        {% elif r.status == "Rejected" %}
+            <span class="badge bg-danger">Rejected</span>
+        {% else %}
+            <span class="badge bg-warning text-dark">Pending</span>
+        {% endif %}
+    </td>
+</tr>
+{% endif %}
+{% endfor %}
+</table>
+
+<hr>
+
+<h5 class="text-center mb-3">Other Requests / Complaints</h5>
+
+<table class="table table-bordered text-center">
+<tr>
+    <th>Type</th>
+    <th>Reason</th>
+    <th>Status</th>
+    <th>Admin Reply</th>
+</tr>
+
+{% for r in requests %}
+{% if r.type not in approval_types %}
+<tr>
+
+<td>{{ r.type }}</td>
+<td>{{ r.reason }}</td>
+
+<td>
+    {% if r.status == "Replied" %}
+        <span class="badge bg-info text-dark">
+            Replied 💬
+            {% if not r.seen_by_student %}
+                <span class="ms-1">🔴</span>
+            {% endif %}
+        </span>
+    {% else %}
+        <span class="badge bg-warning text-dark">Pending</span>
+    {% endif %}
+</td>
+
+<td>
+    {% if r.admin_reply %}
+        <div class="reply-box" data-id="{{ r.id }}" onclick="markSeen(this)" style="cursor:pointer;">
+            💬 {{ r.admin_reply }}
+
+            {% if not r.seen_by_student %}
+                <span class="badge bg-danger ms-2">New</span>
+            {% endif %}
+        </div>
+    {% else %}
+        <span class="text-muted">Waiting for reply</span>
+    {% endif %}
+</td>
+
+</tr>
+{% endif %}
+{% endfor %}
+
+</table>
+
+</div>
 </div>
 
 <footer>
@@ -271,6 +253,11 @@ footer {
 </footer>
 
 <script>
+function markSeen(el){
+    const id = el.getAttribute("data-id");
+    fetch('/mark_seen/' + id);
+}
+
 const typeSelect = document.querySelector('select[name="type"]');
 const otherBox = document.getElementById('otherBox');
 const dateFields = document.getElementById('dateFields');
