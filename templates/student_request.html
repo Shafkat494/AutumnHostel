@@ -81,7 +81,7 @@ select option{
     background-color: #b91c1c !important;
 }
 
-.reply-box {
+.reply-box, .replied_badge {
     margin-top: 6px;
     padding: 8px 12px;
     background: rgba(255, 123, 0, 0.28);
@@ -200,7 +200,12 @@ footer {
 <tr>
     <th>Type</th>
     <th>Reason</th>
-    <th>Status</th>
+    <th>
+        Status
+        {% if has_unread %}
+            <span class="ms-1">🔴</span>
+        {% endif %}
+    </th>
     <th>Admin Reply</th>
 </tr>
 
@@ -213,11 +218,8 @@ footer {
 
 <td>
     {% if r.status == "Replied" %}
-        <span class="badge bg-info text-dark">
+        <span class="badge replied_badge">
             Replied 💬
-            {% if not r.seen_by_student %}
-                <span class="ms-1">🔴</span>
-            {% endif %}
         </span>
     {% else %}
         <span class="badge bg-warning text-dark">Pending</span>

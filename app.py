@@ -845,7 +845,13 @@ def student_request():
     requests = LeaveRequest.query.filter_by(student_id=student.id)\
                                  .order_by(LeaveRequest.id.desc())\
                                  .all()
-    return render_template('student_request.html', requests=requests)
+
+    has_unread = LeaveRequest.query.filter(
+        LeaveRequest.student_id == student.id,   # IMPORTANT (use student_id, not user_id)
+        LeaveRequest.status == "Replied",
+        LeaveRequest.seen_by_student == False
+    ).first() is not None
+    return render_template('student_request.html', requests=requests, has_unread=has_unread)
 
 # ----------------------- ADMIN VIEW REQUESTS ------------------------
 @app.route('/admin/requests')
