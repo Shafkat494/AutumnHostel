@@ -125,6 +125,11 @@ background:linear-gradient(135deg,#c0392b,#922b21);
 background:linear-gradient(135deg,#a0522d,#8b4513);
 }
 
+.card-action .badge {
+    font-size: 0.75rem;
+    padding: 6px 8px;
+}
+
 /* Footer */
 
 footer{
@@ -263,18 +268,25 @@ font-size:1.7rem;
             </div>
 
             <div class="col-lg-3 col-md-4 col-sm-6">
-                <a href="{{ url_for('admin_requests') }}" class="card-action card-bg-danger text-center">
+                <a href="{{ url_for('admin_requests') }}" class="card-action card-bg-danger text-center position-relative">
+
+                    <!-- 🔔 COUNTER -->
+                    <span id="requestBadge"
+                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill {% if pending_replies == 0 %}d-none{% endif %}"
+                        style="background:#ffb347;color:#000;">
+                        {{ pending_replies }}
+                    </span>
 
                     <i class="fas fa-envelope-open-text"></i>
 
                     <div class="card-title">Permission Requests</div>
 
                     <div class="card-sub">
-                        Approve or reject student requests
+                        Approve or reply to student requests
                     </div>
 
                 </a>
-            </div>
+             </div>
 
         </div>
 
@@ -293,6 +305,30 @@ font-size:1.7rem;
     </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function updateUnreadCount(){
+    fetch('/unread_count')
+    .then(res => res.json())
+    .then(data => {
+        const badge = document.getElementById("requestBadge");
+
+        if (!badge) return;
+
+        if (data.count > 0){
+            badge.innerText = data.count;
+            badge.classList.remove("d-none");
+        } else {
+            badge.classList.add("d-none");
+        }
+    });
+}
+
+// run every 5 seconds
+setInterval(updateUnreadCount, 5000);
+
+// run once on load
+updateUnreadCount();
+</script>
 
 </body>
 </html>

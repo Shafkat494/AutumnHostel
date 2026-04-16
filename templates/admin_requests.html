@@ -85,6 +85,27 @@ h2 {
     margin-left: 8px;
 }
 
+.badge {
+    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #fff;
+}
+
+.reply-box {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: rgba(255, 123, 0, 0.30);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    color: #fff7ed;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    display: block;
+    box-shadow: 0 0 14px rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(8px);
+}
+
 /* Footer */
 footer {
     margin-top: auto;
@@ -141,13 +162,41 @@ footer {
     <div class="mb-2">
         <strong>Status:</strong>
         {% if r.status == "Approved" %}
-            <span class="badge bg-success">Approved</span>
+            <span class="badge" style="
+                background: rgba(40, 167, 69, 0.35);
+                border: 1px solid rgba(40, 167, 69, 0.6);
+            ">
+                Approved
+            </span>
         {% elif r.status == "Rejected" %}
-            <span class="badge bg-danger">Rejected</span>
+            <span class="badge" style="
+                background: rgba(220, 53, 69, 0.35);
+                border: 1px solid rgba(220, 53, 69, 0.6);
+            ">
+                Rejected
+            </span>
         {% elif r.status == "Replied" %}
-            <span class="badge bg-info">Replied</span>
+            <span class="badge" style="
+                background: rgba(255, 123, 0, 0.35);
+                color: #fff3e6;
+                border: 1px solid rgba(255, 255, 255, 0.85);
+                box-shadow: 0 0 8px rgba(255, 255, 255, 0.25);
+            ">
+                Replied 💬
+                {% if not r.seen_by_student %}
+                    <span class="ms-1">🔴</span>
+                {% else %}
+                    <span class="ms-1">👁️</span>
+                {% endif %}
+            </span>
         {% else %}
-            <span class="badge bg-warning text-dark">Pending</span>
+            <span class="badge" style="
+                background: rgba(255, 193, 7, 0.35);
+                border: 1px solid rgba(255, 193, 7, 0.6);
+                color: #2b2b2b;
+            ">
+                Pending
+            </span>
         {% endif %}
     </div>
 
@@ -168,8 +217,9 @@ footer {
         {% else %}
 
             {% if r.admin_reply %}
-                <div class="alert alert-info p-2 mt-2">
-                    <strong>Reply:</strong> {{ r.admin_reply }}
+                <!-- ✅ FIXED HERE -->
+                <div class="reply-box">
+                    💬 <strong>Reply:</strong> {{ r.admin_reply }}
                 </div>
             {% else %}
                 <form action="{{ url_for('reply_request', req_id=r.id) }}" method="POST">
@@ -183,8 +233,9 @@ footer {
     {% else %}
 
         {% if r.admin_reply %}
-            <div class="alert alert-info p-2 mt-2">
-                <strong>Reply:</strong> {{ r.admin_reply }}
+            <!-- ✅ FIXED HERE ALSO -->
+            <div class="reply-box">
+                💬 <strong>Reply:</strong> {{ r.admin_reply }}
             </div>
         {% else %}
             <span class="text-muted">No Action Required</span>

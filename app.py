@@ -285,15 +285,24 @@ def create_manager():
     return render_template('create_manager.html')
  
 # ------------------ Dashboards ------------------
-
 @app.route('/admin_dashboard')
 @role_required('admin')
 def admin_dashboard():
     students_count = Student.query.count()
     menu_count = Menu.query.count()
     today_count = Attendance.query.filter_by(date=date.today()).count()
-    return render_template('admin_dashboard.html', students=students_count, menu_items=menu_count, food_count=today_count)
+    pending_replies = LeaveRequest.query.filter(
+        LeaveRequest.admin_reply.isnot(None),
+        LeaveRequest.seen_by_student == False
+    ).count()
 
+    return render_template(
+        'admin_dashboard.html',
+        students=students_count,
+        menu_items=menu_count,
+        food_count=today_count,
+        pending_replies=pending_replies
+    )
 @app.route('/manager_dashboard')
 @role_required('manager')
 def manager_dashboard():
@@ -912,16 +921,25 @@ def reply_request(req_id):
     return redirect(url_for('admin_requests'))
 
 # ----------------------- mark seen --------------------------
-@app.route('/mark_seen/<int:req_id>')
-@role_required('student')
-def mark_seen(req_id):
-    req = LeaveRequest.query.get(req_id)
-
-    if req and req.student_id == session['user_id']:
+@app.route('/mark_seen/<int:id>', methods=['POST'])
+def mark_seen(id):
+    req = LeaveRequest.query.get(id)
+    if req:
         req.seen_by_student = True
         db.session.commit()
+        return {"success": True}
 
-    return '', 204
+    return {"success": False}, 404
+
+# ----------------------- Unread Count -----------------------
+@app.route('/unread_count')
+@role_required('admin', 'manager')
+def unread_count():
+    count = LeaveRequest.query.filter(
+        LeaveRequest.status == "Pending"
+    ).count()
+
+    return {"count": count}
 
 # ------------------ Run App ------------------
 

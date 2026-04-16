@@ -255,7 +255,22 @@ footer {
 <script>
 function markSeen(el){
     const id = el.getAttribute("data-id");
-    fetch('/mark_seen/' + id);
+
+    fetch('/mark_seen/' + id, {
+        method: "POST"
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+
+            const badge = el.querySelector(".bg-danger");
+            if (badge) badge.remove();
+            const redDot = el.closest("tr").querySelector(".badge.bg-danger");
+            if (redDot) redDot.remove();
+
+            el.style.opacity = "0.7";
+        }
+    });
 }
 
 const typeSelect = document.querySelector('select[name="type"]');
