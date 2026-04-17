@@ -167,7 +167,12 @@ footer {
     <th>Type</th>
     <th>From</th>
     <th>To</th>
-    <th>Status</th>
+    <th>
+        Status
+        {% if has_unread_status %}
+            <span class="ms-1">🔴</span>
+        {% endif %}
+    </th>
 </tr>
 
 {% set approval_types = ['Leave', 'Late Entry', 'Gate Pass'] %}
@@ -178,7 +183,7 @@ footer {
     <td>{{ r.type }}</td>
     <td>{{ r.from_date or '-' }}</td>
     <td>{{ r.to_date or '-' }}</td>
-    <td>
+    <td data-id="{{ r.id }}" onclick="markStatusSeen(this)" style="cursor:pointer">
         {% if r.status == "Approved" %}
             <span class="badge bg-success">Approved</span>
         {% elif r.status == "Rejected" %}
@@ -267,10 +272,36 @@ function markSeen(el){
 
             const badge = el.querySelector(".bg-danger");
             if (badge) badge.remove();
+
             const redDot = el.closest("tr").querySelector(".badge.bg-danger");
             if (redDot) redDot.remove();
 
             el.style.opacity = "0.7";
+
+            // ✅ REMOVE HEADER DOT (SMART WAY)
+            const remaining = document.querySelectorAll(".reply-box .bg-danger");
+
+            if (remaining.length === 0) {
+                const headerDot = document.querySelector("th span.ms-1");
+                if (headerDot) headerDot.remove();
+            }
+        }
+    });
+}
+
+function markStatusSeen(el){
+    const id = el.getAttribute("data-id");
+
+    fetch('/mark_status_seen/' + id, {
+        method: "POST"
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            el.style.opacity = "0.7";
+
+            // OPTIONAL: remove header dot instantly
+            location.reload(); // simplest + safe
         }
     });
 }

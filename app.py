@@ -119,6 +119,7 @@ class LeaveRequest(db.Model):
     status = db.Column(db.String(20), default="Pending")
     admin_reply = db.Column(db.Text, nullable=True)
     seen_by_student = db.Column(db.Boolean, default=False)
+    seen_status_by_student = db.Column(db.Boolean, default=False)
 
 class Room(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -851,7 +852,18 @@ def student_request():
         LeaveRequest.status == "Replied",
         LeaveRequest.seen_by_student == False
     ).first() is not None
-    return render_template('student_request.html', requests=requests, has_unread=has_unread)
+
+    has_unread_status = LeaveRequest.query.filter(
+        LeaveRequest.student_id == student.id,
+        LeaveRequest.status.in_(["Approved", "Rejected"]),
+        LeaveRequest.seen_status_by_student == False
+    ).first() is not None
+
+    return render_template(
+        'student_request.html', 
+        requests=requests, 
+        has_unread=has_unread,
+        has_unread_status=has_unread_status)
 
 # ----------------------- ADMIN VIEW REQUESTS ------------------------
 @app.route('/admin/requests')
@@ -875,6 +887,7 @@ def approve_request(req_id):
 
     if req.type in APPROVAL_TYPES:
         req.status = "Approved"
+        req.seen_status_by_student = False
     else:
         flash("This request requires a reply, not approval.", "warning")
 
@@ -892,6 +905,7 @@ def reject_request(req_id):
 
     if req.type in APPROVAL_TYPES:
         req.status = "Rejected"
+        req.seen_status_by_student = False
     else:
         flash("This request requires a reply, not rejection.", "warning")
 
@@ -932,6 +946,19 @@ def mark_seen(id):
     req = LeaveRequest.query.get(id)
     if req:
         req.seen_by_student = True
+        db.session.commit()
+        return {"success": True}
+
+    return {"success": False}, 404
+
+# ----------------------- mark status seen -------------------------
+@app.route('/mark_status_seen/<int:id>', methods=['POST'])
+@role_required('student')
+def mark_status_seen(id):
+    req = LeaveRequest.query.get(id)
+
+    if req and req.student_id == session['user_id']:
+        req.seen_status_by_student = True   # ✅ THIS FIXES YOUR ISSUE
         db.session.commit()
         return {"success": True}
 
