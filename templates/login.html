@@ -159,6 +159,12 @@ footer {
                 <input type="password" class="form-control" name="password" placeholder="Enter password" autocomplete="new-password" required>
             </div>
 
+            <div class="text-end mb-3">
+                <a href="{{ url_for('forgot_password') }}" class="text-light" style="font-size:0.9rem;">
+                    Forgot Password?
+                </a>
+            </div>
+
             <button type="submit" class="btn btn-primary w-100">Login</button>
 
             <div class="text-center mt-3">

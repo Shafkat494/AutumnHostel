@@ -5,11 +5,12 @@ from datetime import datetime, date
 import os
 from functools import wraps
 from sqlalchemy import extract, func
+import time
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev_secret_key_change_this')
 
-# ------------------ Database Configuration ------------------S
+# ------------------ Database Configuration ------------------
 
 # Get the absolute path to the current directory
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -974,6 +975,45 @@ def unread_count():
 
     return {"count": count}
 
+# ----------------------- Forgot Password Route -------------------------
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        role = request.form.get('role')
+        new_password = request.form.get('new_password')
+
+        time.sleep(0.6)  # basic anti-bruteforce delay
+
+        if not username or not role or not new_password:
+            flash("All fields are required!", "danger")
+            return redirect(url_for('forgot_password'))
+
+        user = None
+
+        # 🔐 Admin / Manager
+        if role in ["admin", "manager"]:
+            user = User.query.filter_by(username=username, role=role).first()
+            if user:
+                user.set_password(new_password)
+
+        # 👤 Student
+        elif role == "student":
+            user = Student.query.filter_by(username=username).first()
+            if user:
+                user.set_password(new_password)
+
+        # 🚨 SECURITY FIX: always same response
+        flash("If account exists, password has been updated.", "success")
+
+        if user:
+            db.session.commit()
+
+        return redirect(url_for('login'))
+
+    return render_template('forgot_password.html')
+    
 # ------------------ Run App ------------------
 
 if __name__ == "__main__":
